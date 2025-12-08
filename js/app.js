@@ -482,20 +482,53 @@ const App = {
                             Grassi: ${meal.totalNutrition.fats}g
                         </div>
                     ` : ''}
-                    <button class="btn btn-primary meal-add-btn" data-meal-type="${key}">
-                        ${meal ? '✏️ Modifica Pasto' : '+ Aggiungi Alimenti'}
-                    </button>
+                    <div style="display: flex; gap: 10px; margin-top: 0.5rem;">
+                        <button class="btn btn-primary meal-add-btn" data-meal-type="${key}" style="flex: 1;">
+                            ${meal ? '✏️ Modifica Pasto' : '+ Aggiungi Alimenti'}
+                        </button>
+                        ${meal ? `
+                            <button class="btn btn-danger meal-delete-btn" data-meal-id="${meal.id}" data-meal-type="${key}" style="background: #dc3545; color: white;">
+                                🗑️ Elimina
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             `;
         }));
 
         container.innerHTML = mealsHTML.join('');
 
-        // Add click handlers to add buttons
+        // Add click handlers to add/modify buttons
         container.querySelectorAll('.meal-add-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const mealType = btn.dataset.mealType;
                 this.showFoodSelector(mealType);
+            });
+        });
+
+        // Add click handlers to delete buttons
+        container.querySelectorAll('.meal-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const mealId = btn.dataset.mealId;
+                const mealType = btn.dataset.mealType;
+                const mealName = {
+                    breakfast: 'Colazione',
+                    morningSnack: 'Spuntino Mattina',
+                    lunch: 'Pranzo',
+                    afternoonSnack: 'Merenda',
+                    dinner: 'Cena'
+                }[mealType];
+                
+                if (confirm(`Sei sicuro di voler eliminare ${mealName}? Questa azione non può essere annullata.`)) {
+                    const success = await Meals.deleteMeal(mealId);
+                    if (success) {
+                        this.showToast('Pasto eliminato con successo', 'success');
+                        await this.renderMealsForDate(this.selectedDate);
+                        await this.renderDashboard();
+                    } else {
+                        this.showToast('Errore nell\'eliminazione del pasto', 'error');
+                    }
+                }
             });
         });
     },
