@@ -1537,7 +1537,7 @@ const App = {
     async exportWorkoutToPDF() {
         const profile = Profiles.getCurrentProfile();
         if (!profile) {
-            this.showNotification('Seleziona un profilo prima', 'error');
+            this.showToast('Seleziona un profilo prima', 'error');
             return;
         }
 
@@ -1545,7 +1545,7 @@ const App = {
         const program = Workout.getProgram(level);
         
         // Show loading notification
-        this.showNotification('Generazione PDF in corso...', 'info');
+        this.showToast('Generazione PDF in corso...', 'info');
 
         try {
             const { jsPDF } = window.jspdf;
@@ -1569,7 +1569,7 @@ const App = {
 
             // Helper function to wrap text
             const wrapText = (text, maxWidth) => {
-                return doc.splitTextToSize(text, maxWidth);
+                return doc.splitTextToSize(PDFExport.cleanTextForPDF(text), maxWidth);
             };
 
             // Title
@@ -1581,9 +1581,9 @@ const App = {
             // Profile info
             doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Profilo: ${profile.name}`, pageWidth / 2, yPos, { align: 'center' });
+            doc.text(PDFExport.cleanTextForPDF(`Profilo: ${profile.name}`), pageWidth / 2, yPos, { align: 'center' });
             yPos += 6;
-            doc.text(`Livello: ${level === 'beginner' ? 'Principiante' : level === 'intermediate' ? 'Intermedio' : 'Avanzato'}`, pageWidth / 2, yPos, { align: 'center' });
+            doc.text(PDFExport.cleanTextForPDF(`Livello: ${level === 'beginner' ? 'Principiante' : level === 'intermediate' ? 'Intermedio' : 'Avanzato'}`), pageWidth / 2, yPos, { align: 'center' });
             yPos += 6;
             doc.text(`Data: ${new Date().toLocaleDateString('it-IT')}`, pageWidth / 2, yPos, { align: 'center' });
             yPos += 15;
@@ -1608,7 +1608,7 @@ const App = {
                 doc.rect(margin, yPos - 5, maxWidth, 10, 'F');
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(14);
-                doc.text(`${day.day} - ${day.type}`, margin + 3, yPos + 2);
+                doc.text(PDFExport.cleanTextForPDF(`${day.day} - ${day.type}`), margin + 3, yPos + 2);
                 yPos += 12;
 
                 // Exercises for this day
@@ -1620,7 +1620,7 @@ const App = {
                     // Exercise name
                     doc.setFontSize(12);
                     doc.setTextColor(0, 105, 148);
-                    doc.text(`• ${exercise.name}`, margin + 2, yPos);
+                    doc.text(PDFExport.cleanTextForPDF(`- ${exercise.name}`), margin + 2, yPos);
                     yPos += 6;
 
                     // Exercise details
@@ -1658,8 +1658,8 @@ const App = {
                         const cleanText = exercise.detailedDescription
                             .replace(/<strong>/g, '')
                             .replace(/<\/strong>/g, ': ')
-                            .replace(/•/g, '  •')
-                            .replace(/✗/g, '  ✗')
+                            .replace(/•/g, '  -')
+                            .replace(/✗/g, '  X')
                             .replace(/<[^>]*>/g, '\n')
                             .split('\n')
                             .filter(line => line.trim().length > 0);
@@ -1689,10 +1689,10 @@ const App = {
             const fileName = `Scheda_Allenamento_${profile.name}_${level}_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
 
-            this.showNotification('PDF generato con successo!', 'success');
+            this.showToast('PDF generato con successo!', 'success');
         } catch (error) {
             console.error('Error generating PDF:', error);
-            this.showNotification('Errore nella generazione del PDF', 'error');
+            this.showToast('Errore nella generazione del PDF', 'error');
         }
     },
 
