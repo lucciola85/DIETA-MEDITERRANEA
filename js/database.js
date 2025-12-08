@@ -600,9 +600,11 @@ const FoodDatabase = {
         );
     },
 
-    // Get food by exact name
+    // Get food by exact name (case-insensitive)
     getFoodByName(name) {
-        return this.foods.find(food => food.name === name);
+        if (!name) return null;
+        const searchName = name.toLowerCase().trim();
+        return this.foods.find(f => f.name.toLowerCase().trim() === searchName);
     },
 
     // Get category name

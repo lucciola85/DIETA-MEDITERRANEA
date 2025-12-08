@@ -12,6 +12,14 @@ const Meals = {
             mealType: mealType,
             foodItems: foodItems.map(item => ({
                 foodName: item.food.name,
+                foodData: {
+                    calories: item.food.calories,
+                    protein: item.food.protein,
+                    carbs: item.food.carbs,
+                    fats: item.food.fats,
+                    fiber: item.food.fiber,
+                    category: item.food.category
+                },
                 grams: item.grams,
                 nutrition: item.nutrition
             })),
@@ -33,6 +41,14 @@ const Meals = {
 
         meal.foodItems = foodItems.map(item => ({
             foodName: item.food.name,
+            foodData: {
+                calories: item.food.calories,
+                protein: item.food.protein,
+                carbs: item.food.carbs,
+                fats: item.food.fats,
+                fiber: item.food.fiber,
+                category: item.food.category
+            },
             grams: item.grams,
             nutrition: item.nutrition
         }));
@@ -45,7 +61,18 @@ const Meals = {
 
     // Delete meal
     async deleteMeal(mealId) {
-        await Storage.deleteFromStore('meals', mealId);
+        if (!mealId) {
+            console.error('Invalid meal ID');
+            return false;
+        }
+        
+        try {
+            await Storage.deleteFromStore('meals', mealId);
+            return true;
+        } catch (error) {
+            console.error('Error deleting meal:', error);
+            return false;
+        }
     },
 
     // Get meal by ID
