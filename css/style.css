@@ -1770,6 +1770,7 @@ body {
     line-height: 1.6;
 }
 
+/* Override inline styles when JavaScript toggles visibility */
 .exercise-detailed-description[style*="display: block"] {
     display: block !important;
     visibility: visible !important;
@@ -1785,6 +1786,7 @@ body {
     background: #f8f9fa;
     border-radius: 10px;
     border: 2px solid #e0e0e0;
+    /* Force display to override any parent container hiding */
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -1801,6 +1803,7 @@ body {
     position: relative;
     padding-bottom: 56.25%; /* Aspect ratio 16:9 */
     height: 0;
+    /* Allow iframe to be visible - critical for video display */
     overflow: visible !important;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
