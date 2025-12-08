@@ -485,10 +485,28 @@ const App = {
         modal.classList.add('active');
         modal.dataset.mealType = mealType;
 
+        // Initialize selected foods array
+        this.selectedFoods = [];
+        this.calculatedPortions = null;
+
+        // Get target macros for this meal
+        const profile = Profiles.getCurrentProfile();
+        const nutrition = Nutrition.calculateProfileNutrition(profile);
+        const mealMacros = Nutrition.getMealMacros(mealType, nutrition.macros);
+        
+        // Store target for later use
+        this.currentMealTarget = mealMacros;
+
+        // Update meal target info
+        document.getElementById('mealTypeName').textContent = Nutrition.getMealTypeName(mealType);
+        document.getElementById('targetCalories').textContent = mealMacros.calories;
+        document.getElementById('targetCarbs').textContent = mealMacros.carbs;
+        document.getElementById('targetProtein').textContent = mealMacros.protein;
+        document.getElementById('targetFats').textContent = mealMacros.fats;
+
         // Setup modal
         const searchInput = document.getElementById('foodSearch');
         const categorySelect = document.getElementById('foodCategory');
-        const foodList = document.getElementById('foodList');
 
         // Populate categories
         const categories = FoodDatabase.getAllCategories();
@@ -497,6 +515,9 @@ const App = {
 
         // Render all foods initially
         this.renderFoodList(FoodDatabase.getAllFoods());
+
+        // Update selected foods display
+        this.updateSelectedFoodsDisplay();
 
         // Search handler
         searchInput.oninput = () => {
@@ -512,17 +533,270 @@ const App = {
             this.filterFoods(query, category);
         };
 
+        // Calculate portions button handler
+        document.getElementById('calculatePortionsBtn').onclick = () => {
+            this.calculateMealPortions();
+        };
+
+        // Save meal button handler
+        document.getElementById('saveMealBtn').onclick = () => {
+            this.saveMealFromModal();
+        };
+
         // Close modal handler
         modal.querySelector('.modal-close').onclick = () => {
-            modal.classList.remove('active');
+            this.closeFoodModal();
         };
 
         // Close on background click
         modal.onclick = (e) => {
             if (e.target === modal) {
-                modal.classList.remove('active');
+                this.closeFoodModal();
             }
         };
+    },
+
+    // Close food modal
+    closeFoodModal() {
+        const modal = document.getElementById('foodModal');
+        modal.classList.remove('active');
+        this.selectedFoods = [];
+        this.calculatedPortions = null;
+        this.currentMealTarget = null;
+        
+        // Reset search
+        document.getElementById('foodSearch').value = '';
+        document.getElementById('foodCategory').value = '';
+    },
+
+    // Update selected foods display
+    updateSelectedFoodsDisplay() {
+        const container = document.getElementById('selectedFoodsList');
+        const countSpan = document.getElementById('selectedCount');
+        const calculateBtn = document.getElementById('calculatePortionsBtn');
+        const saveMealBtn = document.getElementById('saveMealBtn');
+        const mealAnalysis = document.getElementById('mealAnalysis');
+
+        countSpan.textContent = this.selectedFoods.length;
+
+        if (this.selectedFoods.length === 0) {
+            container.innerHTML = '<p class="empty-message">Seleziona fino a 5 ingredienti dalla lista</p>';
+            calculateBtn.disabled = true;
+            saveMealBtn.style.display = 'none';
+            mealAnalysis.style.display = 'none';
+            return;
+        }
+
+        calculateBtn.disabled = false;
+
+        // Show selected foods
+        const html = this.selectedFoods.map((food, index) => {
+            const portion = this.calculatedPortions ? this.calculatedPortions[index] : null;
+            
+            return `
+                <div class="selected-food-item ${portion ? 'calculated' : ''}">
+                    <div class="selected-food-header">
+                        <div class="selected-food-name">${food.name}</div>
+                        <button class="remove-food-btn" data-index="${index}">×</button>
+                    </div>
+                    <div class="selected-food-info">
+                        Per 100g: ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g
+                    </div>
+                    ${portion ? `
+                        <div class="selected-food-portion">
+                            <input type="number" class="portion-input" value="${portion.grams}" 
+                                   min="10" max="500" step="5" data-index="${index}">
+                            <span>g →</span>
+                            <span>${portion.nutrition.calories} kcal | 
+                                  P: ${portion.nutrition.protein}g | 
+                                  C: ${portion.nutrition.carbs}g | 
+                                  G: ${portion.nutrition.fats}g</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = html;
+
+        // Add remove button handlers
+        container.querySelectorAll('.remove-food-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                this.removeFoodFromSelection(index);
+            });
+        });
+
+        // Add portion input handlers for manual adjustment
+        container.querySelectorAll('.portion-input').forEach(input => {
+            input.addEventListener('change', () => {
+                const index = parseInt(input.dataset.index);
+                const newGrams = parseInt(input.value);
+                this.updatePortionManually(index, newGrams);
+            });
+        });
+
+        // Show meal analysis if portions calculated
+        if (this.calculatedPortions) {
+            this.displayMealAnalysis();
+            saveMealBtn.style.display = 'block';
+        }
+    },
+
+    // Remove food from selection
+    removeFoodFromSelection(index) {
+        this.selectedFoods.splice(index, 1);
+        
+        // Clear calculations if we remove a food
+        if (this.calculatedPortions) {
+            this.calculatedPortions = null;
+        }
+        
+        this.updateSelectedFoodsDisplay();
+        this.renderFoodList(FoodDatabase.getAllFoods());
+    },
+
+    // Update portion manually
+    updatePortionManually(index, newGrams) {
+        if (!this.calculatedPortions || !this.calculatedPortions[index]) return;
+        
+        // Update the grams
+        this.calculatedPortions[index].grams = newGrams;
+        
+        // Recalculate nutrition for this portion
+        const food = this.calculatedPortions[index].food;
+        this.calculatedPortions[index].nutrition = Nutrition.calculateFoodNutrition(food, newGrams);
+        
+        // Update display
+        this.displayMealAnalysis();
+    },
+
+    // Calculate meal portions
+    calculateMealPortions() {
+        if (this.selectedFoods.length === 0) return;
+
+        // Calculate optimal portions
+        this.calculatedPortions = Nutrition.calculateOptimalPortions(
+            this.selectedFoods, 
+            this.currentMealTarget
+        );
+
+        // Update display
+        this.updateSelectedFoodsDisplay();
+        
+        this.showToast('Grammature calcolate! Verifica i valori nutrizionali', 'success');
+    },
+
+    // Display meal analysis
+    displayMealAnalysis() {
+        const analysisDiv = document.getElementById('mealAnalysis');
+        const totalNutritionDiv = document.getElementById('totalNutrition');
+        const macroAdherenceDiv = document.getElementById('macroAdherence');
+        const suggestionsDiv = document.getElementById('suggestions');
+
+        if (!this.calculatedPortions) {
+            analysisDiv.style.display = 'none';
+            return;
+        }
+
+        analysisDiv.style.display = 'block';
+
+        // Get analysis
+        const analysis = Nutrition.analyzeMealComposition(
+            this.calculatedPortions,
+            this.currentMealTarget
+        );
+
+        // Display total nutrition
+        totalNutritionDiv.innerHTML = `
+            <div class="nutrition-item">
+                <span class="nutrition-label">Calorie</span>
+                <span class="nutrition-value">${analysis.totalNutrition.calories} kcal</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">Proteine</span>
+                <span class="nutrition-value">${analysis.totalNutrition.protein}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">Carboidrati</span>
+                <span class="nutrition-value">${analysis.totalNutrition.carbs}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">Grassi</span>
+                <span class="nutrition-value">${analysis.totalNutrition.fats}g</span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">Fibre</span>
+                <span class="nutrition-value">${analysis.totalNutrition.fiber}g</span>
+            </div>
+        `;
+
+        // Display macro adherence
+        const adherenceHTML = ['calories', 'protein', 'carbs', 'fats'].map(macro => {
+            const adh = analysis.adherence[macro];
+            const macroNames = {
+                calories: 'Calorie',
+                protein: 'Proteine',
+                carbs: 'Carboidrati',
+                fats: 'Grassi'
+            };
+            
+            return `
+                <div class="adherence-item ${adh.level}">
+                    <div class="adherence-label">
+                        <span class="adherence-icon">${adh.icon}</span>
+                        <span>${macroNames[macro]}</span>
+                    </div>
+                    <div class="adherence-values">
+                        <div class="adherence-current">
+                            ${analysis.totalNutrition[macro]}${macro === 'calories' ? ' kcal' : 'g'} / 
+                            ${this.currentMealTarget[macro]}${macro === 'calories' ? ' kcal' : 'g'}
+                        </div>
+                        <div class="adherence-deviation">${adh.deviation.toFixed(1)}% scostamento</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        macroAdherenceDiv.innerHTML = adherenceHTML;
+
+        // Display suggestions
+        if (analysis.suggestions && analysis.suggestions.length > 0) {
+            suggestionsDiv.style.display = 'block';
+            suggestionsDiv.innerHTML = analysis.suggestions
+                .map(s => `<div class="suggestion-item">${s}</div>`)
+                .join('');
+        } else {
+            suggestionsDiv.style.display = 'none';
+        }
+    },
+
+    // Save meal from modal
+    async saveMealFromModal() {
+        if (!this.calculatedPortions || this.calculatedPortions.length === 0) {
+            this.showToast('Calcola prima le grammature', 'warning');
+            return;
+        }
+
+        const modal = document.getElementById('foodModal');
+        const mealType = modal.dataset.mealType;
+        const profile = Profiles.getCurrentProfile();
+
+        try {
+            await Meals.saveMeal(
+                profile.id, 
+                Meals.formatDate(this.currentDay), 
+                mealType, 
+                this.calculatedPortions
+            );
+
+            this.closeFoodModal();
+            this.showToast('Pasto salvato con successo!', 'success');
+            await this.renderDayMeals();
+        } catch (error) {
+            console.error('Error saving meal:', error);
+            this.showToast('Errore nel salvataggio del pasto', 'error');
+        }
     },
 
     // Filter and render foods
@@ -549,54 +823,56 @@ const App = {
             return;
         }
 
-        foodList.innerHTML = foods.map(food => `
-            <div class="food-item" data-food="${food.name}">
-                <div class="food-item-name">${food.name}</div>
-                <div class="food-item-category">${FoodDatabase.getCategoryName(food.category)}</div>
-                <div class="food-item-macros">
-                    ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g (per 100g)
+        foodList.innerHTML = foods.map(food => {
+            const isSelected = this.selectedFoods && this.selectedFoods.some(f => f.name === food.name);
+            return `
+                <div class="food-item ${isSelected ? 'selected' : ''}" data-food="${food.name}">
+                    <div class="food-item-name">${food.name}</div>
+                    <div class="food-item-category">${FoodDatabase.getCategoryName(food.category)}</div>
+                    <div class="food-item-macros">
+                        ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g (per 100g)
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Add click handlers
         foodList.querySelectorAll('.food-item').forEach(item => {
-            item.addEventListener('click', async () => {
+            item.addEventListener('click', () => {
                 const foodName = item.dataset.food;
-                await this.addFoodToMeal(foodName);
+                this.toggleFoodSelection(foodName);
             });
         });
     },
 
-    // Add food to meal with automatic portion calculation
-    async addFoodToMeal(foodName) {
-        const modal = document.getElementById('foodModal');
-        const mealType = modal.dataset.mealType;
-        const profile = Profiles.getCurrentProfile();
-
-        try {
+    // Toggle food selection (add or remove from selection)
+    toggleFoodSelection(foodName) {
+        // Check if already selected
+        const index = this.selectedFoods.findIndex(f => f.name === foodName);
+        
+        if (index >= 0) {
+            // Already selected, remove it
+            this.removeFoodFromSelection(index);
+        } else {
+            // Not selected, add it (if under limit)
+            if (this.selectedFoods.length >= 5) {
+                this.showToast('Massimo 5 ingredienti per pasto', 'warning');
+                return;
+            }
+            
             const food = FoodDatabase.getFoodByName(foodName);
             if (!food) {
                 this.showToast('Alimento non trovato', 'error');
                 return;
             }
-
-            // For now, just add the food - in a full implementation, 
-            // we'd allow selecting multiple foods and then calculate optimal portions
-            const nutrition = Nutrition.calculateProfileNutrition(profile);
-            const mealMacros = Nutrition.getMealMacros(mealType, nutrition.macros);
-
-            // Calculate portion for single food
-            const portions = Nutrition.calculateOptimalPortions([food], mealMacros);
-
-            await Meals.saveMeal(profile.id, Meals.formatDate(this.currentDay), mealType, portions);
-
-            modal.classList.remove('active');
-            this.showToast(`${foodName} aggiunto con porzione calcolata automaticamente: ${portions[0].grams}g`, 'success');
-            await this.renderDayMeals();
-        } catch (error) {
-            console.error('Error adding food:', error);
-            this.showToast('Errore nell\'aggiunta dell\'alimento', 'error');
+            
+            this.selectedFoods.push(food);
+            
+            // Clear previous calculations
+            this.calculatedPortions = null;
+            
+            this.updateSelectedFoodsDisplay();
+            this.renderFoodList(FoodDatabase.getAllFoods());
         }
     },
 

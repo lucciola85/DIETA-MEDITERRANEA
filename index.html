@@ -261,17 +261,57 @@
 
     <!-- Food Selector Modal -->
     <div id="foodModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>Seleziona Alimento</h2>
+                <h2>Componi Pasto</h2>
                 <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <input type="text" id="foodSearch" placeholder="Cerca alimento..." class="search-input">
-                <select id="foodCategory" class="category-select">
-                    <option value="">Tutte le categorie</option>
-                </select>
-                <div id="foodList" class="food-list"></div>
+                <div class="modal-layout">
+                    <!-- Left side: Food selection -->
+                    <div class="food-selector-section">
+                        <h3>Cerca Alimenti</h3>
+                        <input type="text" id="foodSearch" placeholder="Cerca alimento..." class="search-input">
+                        <select id="foodCategory" class="category-select">
+                            <option value="">Tutte le categorie</option>
+                        </select>
+                        <div id="foodList" class="food-list"></div>
+                    </div>
+
+                    <!-- Right side: Selected foods and calculations -->
+                    <div class="selected-foods-section">
+                        <div class="meal-target-info" id="mealTargetInfo">
+                            <h3 id="mealTypeName">Pasto</h3>
+                            <div class="target-macros">
+                                <div>Target: <strong id="targetCalories">--</strong> kcal</div>
+                                <div>C: <span id="targetCarbs">--</span>g | P: <span id="targetProtein">--</span>g | G: <span id="targetFats">--</span>g</div>
+                            </div>
+                        </div>
+
+                        <div class="selected-foods-header">
+                            <h3>Ingredienti Selezionati (<span id="selectedCount">0</span>/5)</h3>
+                        </div>
+                        
+                        <div id="selectedFoodsList" class="selected-foods-list">
+                            <p class="empty-message">Seleziona fino a 5 ingredienti dalla lista</p>
+                        </div>
+
+                        <button id="calculatePortionsBtn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" disabled>
+                            🔄 Calcola Grammature Ottimali
+                        </button>
+
+                        <div id="mealAnalysis" class="meal-analysis" style="display: none;">
+                            <h3>📊 Totale Calcolato</h3>
+                            <div id="totalNutrition" class="total-nutrition"></div>
+                            <div id="macroAdherence" class="macro-adherence"></div>
+                            <div id="suggestions" class="suggestions"></div>
+                        </div>
+
+                        <button id="saveMealBtn" class="btn btn-success" style="width: 100%; margin-top: 1rem; display: none;">
+                            💾 Salva Pasto
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
