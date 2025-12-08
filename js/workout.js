@@ -1792,12 +1792,25 @@ const Workout = {
  * ExerciseVideos - Utility for managing exercise video tutorials
  */
 const ExerciseVideos = {
+    // Validate YouTube URL for security
+    isValidYouTubeUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        
+        // Only allow YouTube embed URLs
+        const validPatterns = [
+            /^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]+$/,
+            /^https:\/\/youtube\.com\/embed\/[a-zA-Z0-9_-]+$/
+        ];
+        
+        return validPatterns.some(pattern => pattern.test(url));
+    },
+    
     // Get video URL for an exercise with language preference
     getVideoUrl(exercise, preferredLanguage = 'it') {
         if (!exercise || !exercise.videos) return null;
         
         // Priority: preferred language (Italian by default)
-        if (preferredLanguage === 'it' && exercise.videos.it) {
+        if (preferredLanguage === 'it' && exercise.videos.it && this.isValidYouTubeUrl(exercise.videos.it)) {
             return {
                 url: exercise.videos.it,
                 language: 'it',
@@ -1806,7 +1819,7 @@ const ExerciseVideos = {
         }
         
         // Fallback: English
-        if (exercise.videos.en) {
+        if (exercise.videos.en && this.isValidYouTubeUrl(exercise.videos.en)) {
             return {
                 url: exercise.videos.en,
                 language: 'en',
@@ -1816,7 +1829,7 @@ const ExerciseVideos = {
         
         // Fallback: any available video
         const availableLang = Object.keys(exercise.videos)[0];
-        if (availableLang) {
+        if (availableLang && this.isValidYouTubeUrl(exercise.videos[availableLang])) {
             return {
                 url: exercise.videos[availableLang],
                 language: availableLang,
@@ -1845,7 +1858,7 @@ const ExerciseVideos = {
                 <div class="video-container">
                     <iframe 
                         src="${video.url}" 
-                        frameborder="0" 
+                        style="border: none;" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen
                         loading="lazy"

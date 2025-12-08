@@ -1782,7 +1782,7 @@ body {
 /* Responsive adjustments for videos */
 @media (max-width: 768px) {
     .video-container {
-        padding-bottom: 75%; /* Taller on mobile for better viewing */
+        padding-bottom: 56.25%; /* Keep 16:9 aspect ratio on mobile */
     }
     
     .exercise-video {
