@@ -1862,8 +1862,7 @@ const ExerciseVideos = {
                     <iframe 
                         src="${escapedUrl}" 
                         style="border: none;" 
-                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" 
-                        sandbox="allow-scripts allow-presentation"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                         allowfullscreen
                         loading="lazy"
                         title="Video tutorial ${escapedName}">
