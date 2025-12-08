@@ -35,7 +35,7 @@ Una piattaforma web completa per la gestione di una dieta mediterranea personali
 - Verifica rispetto dei target giornalieri
 
 ### 🥗 Database Alimenti Mediterranei
-- **300+ alimenti** della tradizione mediterranea
+- **530+ alimenti** della tradizione mediterranea
 - 13 categorie (verdure, frutta, cereali, pesce, carni, latticini, etc.)
 - Valori nutrizionali completi per 100g
 - Ricerca e filtri per categoria
@@ -101,7 +101,7 @@ La piattaforma può essere installata come app sul tuo dispositivo:
 └── js/
     ├── app.js             # Logica principale e UI
     ├── storage.js         # Gestione LocalStorage e IndexedDB
-    ├── database.js        # Database 300+ alimenti
+    ├── database.js        # Database 530+ alimenti
     ├── profiles.js        # Gestione profili
     ├── nutrition.js       # Calcoli nutrizionali e TDEE
     ├── meals.js           # Pianificatore pasti
