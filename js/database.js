@@ -180,7 +180,7 @@ const FoodDatabase = {
         { name: 'Semi di girasole', category: 'nuts', calories: 584, protein: 20.8, carbs: 20.0, fats: 51.5, fiber: 8.6 },
         { name: 'Semi di zucca', category: 'nuts', calories: 559, protein: 30.2, carbs: 10.7, fats: 49.1, fiber: 6.0 },
         { name: 'Semi di sesamo', category: 'nuts', calories: 573, protein: 17.7, carbs: 23.4, fats: 49.7, fiber: 11.8 },
-        { name: 'Semi de papavero', category: 'nuts', calories: 525, protein: 17.9, carbs: 28.1, fats: 41.6, fiber: 19.5 },
+        { name: 'Semi di papavero', category: 'nuts', calories: 525, protein: 17.9, carbs: 28.1, fats: 41.6, fiber: 19.5 },
         { name: 'Castagne', category: 'nuts', calories: 213, protein: 2.4, carbs: 45.5, fats: 2.3, fiber: 8.1 },
         { name: 'Semi di canapa', category: 'nuts', calories: 553, protein: 31.6, carbs: 8.7, fats: 48.8, fiber: 4.0 },
         { name: 'Cocco grattugiato', category: 'nuts', calories: 660, protein: 6.9, carbs: 23.7, fats: 64.5, fiber: 16.3 },
