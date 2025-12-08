@@ -9,7 +9,7 @@ const Nutrition = {
     FAT_RICH_THRESHOLD: 5,
     
     // Portion calculation constraints
-    MIN_CALORIES_PER_100G: 10,  // Minimum calorie density to prevent division issues
+    MIN_CALORIES_PER_100G: 10,  // Minimum calorie density (prevents division issues with water, tea, etc.)
     MIN_PORTION_GRAMS: 10,      // Minimum portion size
     MAX_PORTION_GRAMS: 500,     // Maximum portion size
     PORTION_ROUND_INTERVAL: 5,  // Round portions to nearest 5g
@@ -206,14 +206,19 @@ const Nutrition = {
     // 50-200g: round to 10g  
     // Over 200g: round to 25g
     roundToPracticalGrams(grams) {
-        // Round to practical portions for easier measurement
+        // Round to practical intervals: 5g (small), 10g (medium), 25g (large)
         if (grams < 50) {
             return Math.round(grams / this.PORTION_ROUND_INTERVAL) * this.PORTION_ROUND_INTERVAL;
         } else if (grams < 200) {
-            return Math.round(grams / 10) * 10;  // Round to 10g for medium portions
+            return Math.round(grams / 10) * 10;
         } else {
-            return Math.round(grams / 25) * 25;  // Round to 25g for large portions
+            return Math.round(grams / 25) * 25;
         }
+    },
+
+    // Helper: Safe inverse calculation to prevent division issues
+    safeInverse(calories) {
+        return 1 / Math.max(calories, this.MIN_CALORIES_PER_100G);
     },
 
     // Calculate total nutrition for a meal
@@ -278,14 +283,13 @@ const Nutrition = {
         // Foods with higher calorie density get SMALLER portions
         // Foods with lower calorie density get LARGER portions
         const totalInverseWeight = foods.reduce((sum, food) => {
-            // Use Math.max to ensure safe division even if food.calories approaches MIN_CALORIES_PER_100G
-            return sum + (1 / Math.max(food.calories, this.MIN_CALORIES_PER_100G));
+            return sum + this.safeInverse(food.calories);
         }, 0);
         
         // STEP 2: Distribute calories inversely to calorie density
         const portions = foods.map(food => {
-            // Inverse weight: less caloric foods have higher weight (safe division)
-            const inverseWeight = 1 / Math.max(food.calories, this.MIN_CALORIES_PER_100G);
+            // Inverse weight: less caloric foods have higher weight
+            const inverseWeight = this.safeInverse(food.calories);
             
             // Calculate calorie share for this food (proportional to inverse weight)
             const calorieShare = (inverseWeight / totalInverseWeight) * targetCalories;
@@ -360,38 +364,38 @@ const Nutrition = {
             // Adjust portions based on which foods can help balance macros
             portions.forEach(portion => {
                 let adjustment = 1.0;
-                let adjustmentCount = 0;
+                let hasAdjustment = false;
                 
                 // Secondary goal: balance macros based on food's macro profile
                 // If we need more protein and this food is protein-rich, increase it slightly
                 if (proteinDiff < 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 } else if (proteinDiff > 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 }
                 
                 // If we need more carbs and this food is carb-rich, increase it
                 if (carbsDiff < 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 } else if (carbsDiff > 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 }
                 
                 // If we need more fats and this food is fat-rich, increase it
                 if (fatsDiff < 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 } else if (fatsDiff > 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
-                    adjustmentCount++;
+                    hasAdjustment = true;
                 }
                 
-                // Only apply adjustment if we made any macro adjustments
-                if (adjustmentCount > 0) {
+                // Only apply adjustment if any macro adjustments were made
+                if (hasAdjustment) {
                     let newGrams = portion.grams * adjustment;
                     newGrams = this.roundToPracticalGrams(newGrams);
                     newGrams = Math.max(this.MIN_PORTION_GRAMS, Math.min(this.MAX_PORTION_GRAMS, newGrams));
