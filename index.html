@@ -8,6 +8,8 @@
     <title>Dieta Mediterranea & Allenamento</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- Profile Selection Screen -->
@@ -171,6 +173,10 @@
                     <h1>Lista della Spesa</h1>
                     <button id="generateShoppingList" class="btn btn-primary">Genera Lista Settimanale</button>
                 </div>
+                <p class="help-text">
+                    La lista viene generata solo dai pasti che hai compilato. 
+                    Non è necessario completare tutta la settimana.
+                </p>
                 <div id="shoppingList" class="shopping-list"></div>
                 <div class="shopping-actions" style="display:none;">
                     <button id="exportShoppingList" class="btn btn-secondary">📄 Esporta TXT</button>
@@ -221,12 +227,19 @@
             <!-- Workout Page -->
             <div id="workoutPage" class="page">
                 <div class="page-header">
-                    <h1>Scheda Allenamento</h1>
-                    <select id="workoutLevel" class="workout-level-select">
-                        <option value="beginner">Principiante</option>
-                        <option value="intermediate">Intermedio</option>
-                        <option value="advanced">Avanzato</option>
-                    </select>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <h1 style="margin: 0;">Scheda Allenamento</h1>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <select id="workoutLevel" class="workout-level-select">
+                                <option value="beginner">Principiante</option>
+                                <option value="intermediate">Intermedio</option>
+                                <option value="advanced">Avanzato</option>
+                            </select>
+                            <button id="exportWorkoutPdfBtn" class="btn btn-primary" style="white-space: nowrap;">
+                                📄 Esporta PDF
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div id="workoutSchedule" class="workout-schedule"></div>
             </div>
@@ -286,7 +299,7 @@
                         <div class="meal-target-info" id="mealTargetInfo">
                             <h3 id="mealTypeName">Pasto</h3>
                             <div class="target-macros">
-                                <div>Target: <strong id="targetCalories">--</strong> kcal</div>
+                                <div>Target: <strong id="mealTargetCalories">--</strong> kcal</div>
                                 <div>Carboidrati: <span id="targetCarbs">--</span>g | Proteine: <span id="targetProtein">--</span>g | Grassi: <span id="targetFats">--</span>g</div>
                             </div>
                         </div>

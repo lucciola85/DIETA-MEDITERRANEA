@@ -154,6 +154,11 @@ const App = {
         document.getElementById('workoutLevel')?.addEventListener('change', (e) => {
             this.renderWorkoutSchedule(e.target.value);
         });
+
+        // Export workout PDF
+        document.getElementById('exportWorkoutPdfBtn')?.addEventListener('click', () => {
+            this.exportWorkoutToPDF();
+        });
     },
 
     // Show specific screen
@@ -571,7 +576,7 @@ const App = {
 
         // Update meal target info
         document.getElementById('mealTypeName').textContent = Nutrition.getMealTypeName(mealType);
-        document.getElementById('targetCalories').textContent = mealMacros.calories;
+        document.getElementById('mealTargetCalories').textContent = mealMacros.calories;
         document.getElementById('targetCarbs').textContent = mealMacros.carbs;
         document.getElementById('targetProtein').textContent = mealMacros.protein;
         document.getElementById('targetFats').textContent = mealMacros.fats;
@@ -974,10 +979,16 @@ const App = {
         const endDate = weekDates[6];
 
         try {
-            const shoppingList = await Meals.generateShoppingList(profile.id, startDate, endDate);
-            this.renderShoppingList(shoppingList);
-            document.getElementById('exportShoppingList').style.display = 'inline-block';
-            this.showToast('Lista della spesa generata', 'success');
+            const result = await Meals.generateShoppingList(profile.id, startDate, endDate);
+            this.renderShoppingList(result);
+            
+            // Show/hide export button based on whether there are meals
+            const actionsContainer = document.querySelector('.shopping-actions');
+            if (actionsContainer) {
+                actionsContainer.style.display = result.summary.totalMeals > 0 ? 'flex' : 'none';
+            }
+            
+            this.showToast(result.summary.message, result.summary.totalMeals > 0 ? 'success' : 'info');
         } catch (error) {
             console.error('Error generating shopping list:', error);
             this.showToast('Errore nella generazione della lista', 'error');
@@ -985,38 +996,68 @@ const App = {
     },
 
     // Render shopping list
-    renderShoppingList(shoppingList) {
+    renderShoppingList(result) {
         const container = document.getElementById('shoppingList');
         const actionsContainer = document.querySelector('.shopping-actions');
 
-        if (Object.keys(shoppingList).length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #999;">Nessun alimento nella lista</p>';
+        // Build summary HTML
+        const summaryHtml = `
+            <div class="shopping-list-summary">
+                <h4>📊 Riepilogo</h4>
+                <p>${result.summary.message}</p>
+                ${result.summary.totalMeals > 0 ? `
+                    <details>
+                        <summary>Giorni inclusi (${result.summary.totalDays})</summary>
+                        <ul>
+                            ${result.summary.mealsIncluded.map(m => 
+                                `<li>${m.day} - ${m.mealType}</li>`
+                            ).join('')}
+                        </ul>
+                    </details>
+                ` : ''}
+            </div>
+        `;
+
+        // If no meals
+        if (result.summary.totalMeals === 0) {
+            container.innerHTML = `
+                ${summaryHtml}
+                <div class="empty-state">
+                    <p>🛒 Nessun ingrediente da mostrare</p>
+                    <p>Vai al <strong>Pianificatore Pasti</strong> e compila almeno un pasto per generare la lista della spesa.</p>
+                </div>
+            `;
             if (actionsContainer) actionsContainer.style.display = 'none';
             return;
         }
 
-        const html = Object.keys(shoppingList).map(categoryKey => {
+        // Build shopping list HTML
+        let listHtml = summaryHtml + '<div class="shopping-list-items">';
+        
+        Object.keys(result.items).forEach(categoryKey => {
             const categoryName = FoodDatabase.getCategoryName(categoryKey);
-            const items = shoppingList[categoryKey];
-
-            return `
+            listHtml += `
                 <div class="shopping-category">
                     <h3>${categoryName}</h3>
                     <div class="shopping-items">
-                        ${items.map(item => `
+                        ${result.items[categoryKey].map(item => `
                             <div class="shopping-item">
                                 <input type="checkbox" id="shop-${categoryKey}-${item.name}">
                                 <label for="shop-${categoryKey}-${item.name}">
-                                    ${item.name} - ${item.grams}g
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-quantity">${item.grams}g</span>
+                                    ${item.occurrences > 1 ? `<span class="item-occurrences">(usato ${item.occurrences}x)</span>` : ''}
                                 </label>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
-        }).join('');
-
-        container.innerHTML = html;
+        });
+        
+        listHtml += '</div>';
+        
+        container.innerHTML = listHtml;
 
         // Show action buttons
         if (actionsContainer) actionsContainer.style.display = 'flex';
@@ -1033,9 +1074,9 @@ const App = {
     async exportShoppingList() {
         const profile = Profiles.getCurrentProfile();
         const weekDates = Meals.getWeekDates(this.currentWeek);
-        const shoppingList = await Meals.generateShoppingList(profile.id, weekDates[0], weekDates[6]);
+        const result = await Meals.generateShoppingList(profile.id, weekDates[0], weekDates[6]);
         
-        const text = Meals.exportShoppingListToText(shoppingList);
+        const text = Meals.exportShoppingListToText(result.items);
         
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -1230,6 +1271,169 @@ const App = {
                 }
             });
         });
+    },
+
+    // Export workout to PDF
+    async exportWorkoutToPDF() {
+        const profile = Profiles.getCurrentProfile();
+        if (!profile) {
+            this.showNotification('Seleziona un profilo prima', 'error');
+            return;
+        }
+
+        const level = document.getElementById('workoutLevel').value;
+        const program = Workout.getProgram(level);
+        
+        // Show loading notification
+        this.showNotification('Generazione PDF in corso...', 'info');
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let yPos = 20;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 20;
+            const maxWidth = pageWidth - 2 * margin;
+
+            // Helper function to add new page if needed
+            const checkPageBreak = (neededSpace) => {
+                if (yPos + neededSpace > pageHeight - 20) {
+                    doc.addPage();
+                    yPos = 20;
+                    return true;
+                }
+                return false;
+            };
+
+            // Helper function to wrap text
+            const wrapText = (text, maxWidth) => {
+                return doc.splitTextToSize(text, maxWidth);
+            };
+
+            // Title
+            doc.setFontSize(22);
+            doc.setTextColor(0, 105, 148); // Sea blue
+            doc.text('SCHEDA ALLENAMENTO', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 10;
+
+            // Profile info
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Profilo: ${profile.name}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 6;
+            doc.text(`Livello: ${level === 'beginner' ? 'Principiante' : level === 'intermediate' ? 'Intermedio' : 'Avanzato'}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 6;
+            doc.text(`Data: ${new Date().toLocaleDateString('it-IT')}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+
+            // Program description
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+            const descLines = wrapText(program.description, maxWidth);
+            descLines.forEach(line => {
+                checkPageBreak(6);
+                doc.text(line, margin, yPos);
+                yPos += 6;
+            });
+            yPos += 5;
+
+            // Iterate through each day
+            for (const day of program.schedule) {
+                checkPageBreak(15);
+
+                // Day header
+                doc.setFillColor(0, 105, 148);
+                doc.rect(margin, yPos - 5, maxWidth, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
+                doc.text(`${day.day} - ${day.type}`, margin + 3, yPos + 2);
+                yPos += 12;
+
+                // Exercises for this day
+                for (const ex of day.exercises) {
+                    const exercise = Workout.getExercise(ex.exercise);
+                    
+                    checkPageBreak(25);
+
+                    // Exercise name
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 105, 148);
+                    doc.text(`• ${exercise.name}`, margin + 2, yPos);
+                    yPos += 6;
+
+                    // Exercise details
+                    doc.setFontSize(10);
+                    doc.setTextColor(60, 60, 60);
+                    const details = `${ex.sets} serie × ${ex.reps} ripetizioni` +
+                        (ex.weight ? ` - ${ex.weight}` : '') +
+                        (ex.resistance ? ` - Resistenza ${ex.resistance}` : '') +
+                        (ex.rest !== undefined ? ` - Recupero: ${ex.rest}s` : exercise.restBetweenSets ? ` - Recupero: ${exercise.restBetweenSets}s` : '') +
+                        (exercise.tempo ? ` - Tempo: ${exercise.tempo}` : '');
+                    const detailLines = wrapText(details, maxWidth - 5);
+                    detailLines.forEach(line => {
+                        checkPageBreak(5);
+                        doc.text(line, margin + 5, yPos);
+                        yPos += 5;
+                    });
+
+                    // Short description
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    const descLine = wrapText(exercise.description, maxWidth - 5);
+                    descLine.forEach(line => {
+                        checkPageBreak(5);
+                        doc.text(line, margin + 5, yPos);
+                        yPos += 5;
+                    });
+
+                    // Detailed description if available
+                    if (exercise.detailedDescription) {
+                        yPos += 2;
+                        doc.setFontSize(9);
+                        doc.setTextColor(80, 80, 80);
+                        
+                        // Clean HTML tags and format the detailed description
+                        const cleanText = exercise.detailedDescription
+                            .replace(/<strong>/g, '')
+                            .replace(/<\/strong>/g, ': ')
+                            .replace(/•/g, '  •')
+                            .replace(/✗/g, '  ✗')
+                            .replace(/<[^>]*>/g, '\n')
+                            .split('\n')
+                            .filter(line => line.trim().length > 0);
+
+                        for (const line of cleanText) {
+                            const wrappedLines = wrapText(line.trim(), maxWidth - 5);
+                            wrappedLines.forEach(wl => {
+                                checkPageBreak(4);
+                                doc.text(wl, margin + 5, yPos);
+                                yPos += 4;
+                            });
+                        }
+                    }
+
+                    yPos += 5; // Space between exercises
+                }
+
+                yPos += 5; // Space between days
+            }
+
+            // Footer on last page
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Generato da Dieta Mediterranea & Allenamento', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+            // Save the PDF
+            const fileName = `Scheda_Allenamento_${profile.name}_${level}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+
+            this.showNotification('PDF generato con successo!', 'success');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            this.showNotification('Errore nella generazione del PDF', 'error');
+        }
     },
 
     // Render profile page
