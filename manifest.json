@@ -1,0 +1,25 @@
+{
+  "name": "Dieta Mediterranea & Allenamento",
+  "short_name": "Dieta Med",
+  "description": "Piattaforma per la gestione di una dieta mediterranea personalizzata e scheda di allenamento casalingo",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#006994",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23006994'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🌊%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23006994'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🌊%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["health", "lifestyle"],
+  "lang": "it",
+  "dir": "ltr"
+}
