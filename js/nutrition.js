@@ -264,16 +264,27 @@ const Nutrition = {
             foods = validFoods;
         }
 
-        // Start with equal calories distribution
-        const caloriesPerFood = targetMacros.calories / foods.length;
+        const targetCalories = targetMacros.calories;
         
+        // STEP 1: Calculate inverse calorie density weights
+        // Foods with higher calorie density get SMALLER portions
+        // Foods with lower calorie density get LARGER portions
+        const totalInverseWeight = foods.reduce((sum, food) => sum + (1 / food.calories), 0);
+        
+        // STEP 2: Distribute calories inversely to calorie density
         const portions = foods.map(food => {
-            // Calculate grams needed to reach the calorie target for this food
-            // calories = (food.calories * grams) / 100
-            // grams = (calories * 100) / food.calories
-            let grams = (caloriesPerFood * 100) / food.calories;
+            // Inverse weight: less caloric foods have higher weight
+            const inverseWeight = 1 / food.calories;
             
-            // Round to practical portions using new function
+            // Calculate calorie share for this food (proportional to inverse weight)
+            const calorieShare = (inverseWeight / totalInverseWeight) * targetCalories;
+            
+            // Calculate grams needed for this calorie share
+            // calories = (food.calories * grams) / 100
+            // grams = (calorieShare * 100) / food.calories
+            let grams = (calorieShare * 100) / food.calories;
+            
+            // Round to practical portions
             grams = this.roundToPracticalGrams(grams);
             
             // Apply constraints: minimum 10g, maximum 500g per food item
@@ -286,9 +297,24 @@ const Nutrition = {
             };
         });
 
-        // Refine portions to better match macros (iterative adjustment)
-        // This optimization tries to match calories first, then balance macros
-        // 20 iterations provide good balance between accuracy and performance
+        // STEP 3: Ensure total does NOT exceed target
+        let totalCalories = portions.reduce((sum, p) => sum + p.nutrition.calories, 0);
+        
+        // If we exceed the target, scale down ALL portions proportionally
+        if (totalCalories > targetCalories) {
+            const scaleFactor = targetCalories / totalCalories;
+            
+            portions.forEach(portion => {
+                // Scale down the grams
+                portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * scaleFactor));
+                portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
+            });
+            
+            // Recalculate total after scaling
+            totalCalories = portions.reduce((sum, p) => sum + p.nutrition.calories, 0);
+        }
+
+        // STEP 4: Iterative optimization to balance macros while staying under target
         const MAX_ITERATIONS = 20;
         
         for (let i = 0; i < MAX_ITERATIONS; i++) {
@@ -305,50 +331,72 @@ const Nutrition = {
             const carbsDiff = currentTotal.carbs - targetMacros.carbs;
             const fatsDiff = currentTotal.fats - targetMacros.fats;
 
-            // Check if we're close enough (within 3% for calories)
-            if (Math.abs(calorieDiff) < targetMacros.calories * 0.03) {
+            // Check if we're close enough (within 5% for calories)
+            if (Math.abs(calorieDiff) < targetMacros.calories * 0.05) {
                 break;
             }
 
-            // Adjust portions based on which foods can help balance macros
-            // Foods with higher protein density should be adjusted when protein is low
-            // Foods with higher carb density should be adjusted when carbs are low, etc.
+            // CRITICAL: If we're over the calorie target, scale down
+            if (calorieDiff > 0) {
+                const scaleFactor = targetMacros.calories / currentTotal.calories;
+                portions.forEach(portion => {
+                    portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * scaleFactor));
+                    portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
+                });
+                continue;
+            }
             
+            // Adjust portions based on which foods can help balance macros
             portions.forEach(portion => {
                 let adjustment = 1.0;
-                
-                // Primary goal: match calories
-                const calorieAdjustment = targetMacros.calories / currentTotal.calories;
-                adjustment *= calorieAdjustment;
+                let adjustmentCount = 0;
                 
                 // Secondary goal: balance macros based on food's macro profile
                 // If we need more protein and this food is protein-rich, increase it slightly
                 if (proteinDiff < 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                    adjustmentCount++;
                 } else if (proteinDiff > 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
+                    adjustmentCount++;
                 }
                 
                 // If we need more carbs and this food is carb-rich, increase it
                 if (carbsDiff < 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                    adjustmentCount++;
                 } else if (carbsDiff > 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
+                    adjustmentCount++;
                 }
                 
                 // If we need more fats and this food is fat-rich, increase it
                 if (fatsDiff < 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                    adjustmentCount++;
                 } else if (fatsDiff > 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
                     adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
+                    adjustmentCount++;
                 }
                 
-                // Apply adjustment
-                let newGrams = portion.grams * adjustment;
-                newGrams = this.roundToPracticalGrams(newGrams);
-                newGrams = Math.max(10, Math.min(500, newGrams));
-                
-                portion.grams = newGrams;
+                // Only apply adjustment if we made any macro adjustments
+                if (adjustmentCount > 0) {
+                    let newGrams = portion.grams * adjustment;
+                    newGrams = this.roundToPracticalGrams(newGrams);
+                    newGrams = Math.max(10, Math.min(500, newGrams));
+                    
+                    portion.grams = newGrams;
+                    portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
+                }
+            });
+        }
+        
+        // FINAL CHECK: Ensure we absolutely never exceed target
+        totalCalories = portions.reduce((sum, p) => sum + p.nutrition.calories, 0);
+        if (totalCalories > targetCalories) {
+            const finalScaleFactor = targetCalories / totalCalories;
+            portions.forEach(portion => {
+                portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * finalScaleFactor));
                 portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
             });
         }

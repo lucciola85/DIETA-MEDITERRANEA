@@ -667,13 +667,14 @@ const App = {
 
         if (this.selectedFoods.length === 0) {
             container.innerHTML = '<p class="empty-message">Seleziona fino a 5 ingredienti dalla lista</p>';
-            calculateBtn.disabled = true;
+            calculateBtn.style.display = 'none'; // Hide auto-calculate button
             saveMealBtn.style.display = 'none';
             mealAnalysis.style.display = 'none';
             return;
         }
 
-        calculateBtn.disabled = false;
+        // Hide the calculate button since portions are now auto-calculated
+        calculateBtn.style.display = 'none';
 
         // Show selected foods
         const html = this.selectedFoods.map((food, index) => {
@@ -721,7 +722,7 @@ const App = {
                 
                 // Validate portion range (10-500g)
                 if (isNaN(newGrams) || newGrams < 10 || newGrams > 500) {
-                    showNotification('Grammatura deve essere tra 10g e 500g', 'error');
+                    this.showToast('Grammatura deve essere tra 10g e 500g', 'error');
                     input.value = this.calculatedPortions[index].grams; // Reset to previous value
                     return;
                 }
@@ -741,12 +742,15 @@ const App = {
     removeFoodFromSelection(index) {
         this.selectedFoods.splice(index, 1);
         
-        // Clear calculations if we remove a food
-        if (this.calculatedPortions) {
+        // Automatically recalculate portions after removing a food
+        if (this.selectedFoods.length > 0) {
+            this.calculateMealPortions();
+        } else {
+            // Clear calculations if no foods remain
             this.calculatedPortions = null;
+            this.updateSelectedFoodsDisplay();
         }
         
-        this.updateSelectedFoodsDisplay();
         this.renderFoodList(FoodDatabase.getAllFoods());
     },
 
@@ -777,8 +781,6 @@ const App = {
 
         // Update display
         this.updateSelectedFoodsDisplay();
-        
-        this.showToast('Grammature calcolate! Verifica i valori nutrizionali', 'success');
     },
 
     // Display meal analysis
@@ -962,10 +964,9 @@ const App = {
             
             this.selectedFoods.push(food);
             
-            // Clear previous calculations
-            this.calculatedPortions = null;
+            // Automatically calculate portions when adding a food
+            this.calculateMealPortions();
             
-            this.updateSelectedFoodsDisplay();
             this.renderFoodList(FoodDatabase.getAllFoods());
         }
     },
