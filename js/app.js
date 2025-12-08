@@ -478,33 +478,98 @@ const App = {
             const mealMacros = Nutrition.getMealMacros(key, nutrition.macros);
             const meal = await Meals.getMealByDateAndType(profile.id, this.currentDay, key);
 
-            return `
-                <div class="meal-section">
-                    <div class="meal-header">
-                        <h3>${name}</h3>
-                        <div class="meal-target">Target: ${mealMacros.calories} kcal</div>
-                    </div>
-                    <div class="meal-items" id="meal-${key}">
-                        ${meal ? this.renderMealItems(meal.foodItems) : '<p style="color: #999;">Nessun alimento aggiunto</p>'}
-                    </div>
-                    ${meal ? `
-                        <div style="margin-top: 1rem; padding: 1rem; background: var(--cream); border-radius: 6px;">
-                            <strong>Totale:</strong> 
-                            ${meal.totalNutrition.calories} kcal | 
-                            Proteine: ${meal.totalNutrition.protein}g | 
-                            Carboidrati: ${meal.totalNutrition.carbs}g | 
-                            Grassi: ${meal.totalNutrition.fats}g
+            if (!meal) {
+                // Empty meal - show add button
+                return `
+                    <div class="meal-section" data-meal-type="${key}">
+                        <div class="meal-header">
+                            <h3>${name}</h3>
+                            <div class="meal-target">Target: ${mealMacros.calories} kcal</div>
                         </div>
-                    ` : ''}
-                    <div style="display: flex; gap: 10px; margin-top: 0.5rem;">
-                        <button class="btn btn-primary meal-add-btn" data-meal-type="${key}" style="flex: 1;">
-                            ${meal ? '✏️ Modifica Pasto' : '+ Aggiungi Alimenti'}
-                        </button>
-                        ${meal ? `
-                            <button class="btn btn-danger meal-delete-btn" data-meal-id="${meal.id}" data-meal-type="${key}" style="background: #dc3545; color: white;">
-                                🗑️ Elimina
+                        <div class="meal-items">
+                            <p style="color: #999; text-align: center; padding: 2rem;">Nessun alimento aggiunto</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 0.5rem;">
+                            <button class="btn btn-primary meal-add-btn" data-meal-type="${key}" style="flex: 1;">
+                                + Aggiungi Alimenti
                             </button>
-                        ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Saved meal - show with view/edit/delete buttons
+            const caloriesDiff = meal.totalNutrition.calories - mealMacros.calories;
+            const percentDiff = ((caloriesDiff / mealMacros.calories) * 100).toFixed(0);
+            const adherenceIcon = Math.abs(percentDiff) <= 10 ? '✅' : Math.abs(percentDiff) <= 20 ? '⚠️' : '❌';
+            const adherenceText = percentDiff > 0 ? `+${percentDiff}%` : `${percentDiff}%`;
+
+            return `
+                <div class="meal-section saved-meal" data-meal-type="${key}">
+                    <div class="meal-header">
+                        <div style="flex: 1;">
+                            <h3>✅ ${name}</h3>
+                            <div class="meal-target">
+                                ${meal.totalNutrition.calories} kcal / ${mealMacros.calories} kcal 
+                                <span class="adherence-badge ${Math.abs(percentDiff) <= 10 ? 'good' : Math.abs(percentDiff) <= 20 ? 'ok' : 'bad'}">
+                                    ${adherenceIcon} ${adherenceText}
+                                </span>
+                            </div>
+                        </div>
+                        <button class="btn-icon meal-view-toggle" data-meal-type="${key}" title="Mostra/Nascondi dettagli">
+                            👁️
+                        </button>
+                    </div>
+                    
+                    <div class="meal-details" id="meal-details-${key}" style="display: none;">
+                        <div class="meal-composition">
+                            <h4 style="margin-bottom: 0.75rem; color: var(--sea-blue);">📋 Composizione:</h4>
+                            ${meal.foodItems.map(item => `
+                                <div class="meal-ingredient">
+                                    <span class="ingredient-name">• ${item.foodName}</span>
+                                    <span class="ingredient-amount">${item.grams}g</span>
+                                    <span class="ingredient-calories">${item.nutrition.calories} kcal</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="meal-totals">
+                            <h4 style="margin-bottom: 0.75rem; color: var(--sea-blue);">📊 Totali:</h4>
+                            <div class="totals-grid">
+                                <div class="total-item">
+                                    <span class="total-label">Calorie</span>
+                                    <span class="total-value">${meal.totalNutrition.calories} kcal</span>
+                                </div>
+                                <div class="total-item">
+                                    <span class="total-label">Proteine</span>
+                                    <span class="total-value">${meal.totalNutrition.protein}g</span>
+                                </div>
+                                <div class="total-item">
+                                    <span class="total-label">Carboidrati</span>
+                                    <span class="total-value">${meal.totalNutrition.carbs}g</span>
+                                </div>
+                                <div class="total-item">
+                                    <span class="total-label">Grassi</span>
+                                    <span class="total-value">${meal.totalNutrition.fats}g</span>
+                                </div>
+                                <div class="total-item">
+                                    <span class="total-label">Fibre</span>
+                                    <span class="total-value">${meal.totalNutrition.fiber}g</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="meal-actions">
+                        <button class="btn btn-secondary meal-view-btn" data-meal-type="${key}">
+                            👁️ Visualizza
+                        </button>
+                        <button class="btn btn-primary meal-edit-btn" data-meal-type="${key}" data-meal-id="${meal.id}">
+                            ✏️ Modifica
+                        </button>
+                        <button class="btn btn-danger meal-delete-btn" data-meal-id="${meal.id}" data-meal-type="${key}">
+                            🗑️ Elimina
+                        </button>
                     </div>
                 </div>
             `;
@@ -512,7 +577,23 @@ const App = {
 
         container.innerHTML = mealsHTML.join('');
 
-        // Add click handlers to add/modify buttons
+        // Add click handlers for view toggle icons
+        container.querySelectorAll('.meal-view-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mealType = btn.dataset.mealType;
+                this.toggleMealDetails(mealType);
+            });
+        });
+
+        // Add click handlers for view buttons
+        container.querySelectorAll('.meal-view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mealType = btn.dataset.mealType;
+                this.toggleMealDetails(mealType);
+            });
+        });
+
+        // Add click handlers for add buttons
         container.querySelectorAll('.meal-add-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const mealType = btn.dataset.mealType;
@@ -520,7 +601,16 @@ const App = {
             });
         });
 
-        // Add click handlers to delete buttons
+        // Add click handlers for edit buttons
+        container.querySelectorAll('.meal-edit-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const mealType = btn.dataset.mealType;
+                const mealId = btn.dataset.mealId;
+                await this.showFoodSelectorForEdit(mealType, mealId);
+            });
+        });
+
+        // Add click handlers for delete buttons
         container.querySelectorAll('.meal-delete-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const mealId = btn.dataset.mealId;
@@ -537,7 +627,7 @@ const App = {
                     const success = await Meals.deleteMeal(mealId);
                     if (success) {
                         this.showToast('Pasto eliminato con successo', 'success');
-                        await this.renderMealsForDate(this.selectedDate);
+                        await this.renderDayMeals();
                         await this.renderDashboard();
                     } else {
                         this.showToast('Errore nell\'eliminazione del pasto', 'error');
@@ -545,6 +635,96 @@ const App = {
                 }
             });
         });
+    },
+
+    // Toggle meal details visibility
+    toggleMealDetails(mealType) {
+        const detailsDiv = document.getElementById(`meal-details-${mealType}`);
+        const viewBtn = document.querySelector(`.meal-view-btn[data-meal-type="${mealType}"]`);
+        
+        if (detailsDiv.style.display === 'none') {
+            detailsDiv.style.display = 'block';
+            if (viewBtn) viewBtn.textContent = '👁️ Nascondi';
+        } else {
+            detailsDiv.style.display = 'none';
+            if (viewBtn) viewBtn.textContent = '👁️ Visualizza';
+        }
+    },
+
+    // Show food selector for editing existing meal
+    async showFoodSelectorForEdit(mealType, mealId) {
+        const profile = Profiles.getCurrentProfile();
+        const meal = await Meals.getMealByDateAndType(profile.id, this.currentDay, mealType);
+        
+        if (!meal) {
+            this.showToast('Errore: pasto non trovato', 'error');
+            return;
+        }
+
+        // Open the food selector modal
+        const modal = document.getElementById('foodModal');
+        modal.classList.add('active');
+        modal.dataset.mealType = mealType;
+        modal.dataset.editingMealId = mealId;
+
+        // Get target macros for this meal
+        const nutrition = Nutrition.calculateProfileNutrition(profile);
+        const mealMacros = Nutrition.getMealMacros(mealType, nutrition.macros);
+        
+        // Store target for later use
+        this.currentMealTarget = mealMacros;
+
+        // Update meal target info
+        document.getElementById('mealTypeName').textContent = `Modifica: ${Nutrition.getMealTypeName(mealType)}`;
+        document.getElementById('mealTargetCalories').textContent = mealMacros.calories;
+        document.getElementById('targetCarbs').textContent = mealMacros.carbs;
+        document.getElementById('targetProtein').textContent = mealMacros.protein;
+        document.getElementById('targetFats').textContent = mealMacros.fats;
+
+        // Pre-populate with existing foods and portions
+        this.selectedFoods = meal.foodItems.map(item => FoodDatabase.getFoodByName(item.foodName)).filter(f => f);
+        this.calculatedPortions = meal.foodItems.map(item => ({
+            food: FoodDatabase.getFoodByName(item.foodName),
+            grams: item.grams,
+            nutrition: item.nutrition
+        })).filter(p => p.food);
+
+        // Setup modal
+        const searchInput = document.getElementById('foodSearch');
+
+        // Render foods grouped by macro
+        this.renderFoodListByMacro();
+
+        // Update selected foods display
+        this.updateSelectedFoodsDisplay();
+
+        // Search handler
+        searchInput.oninput = () => {
+            const query = searchInput.value;
+            this.filterFoodsByMacro(query);
+        };
+
+        // Calculate portions button handler
+        document.getElementById('calculatePortionsBtn').onclick = () => {
+            this.calculateMealPortions();
+        };
+
+        // Save meal button handler
+        document.getElementById('saveMealBtn').onclick = () => {
+            this.saveMealFromModal();
+        };
+
+        // Close modal handler
+        modal.querySelector('.modal-close').onclick = () => {
+            this.closeFoodModal();
+        };
+
+        // Close on background click
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                this.closeFoodModal();
+            }
+        };
     },
 
     // Render meal items
@@ -592,15 +772,9 @@ const App = {
 
         // Setup modal
         const searchInput = document.getElementById('foodSearch');
-        const categorySelect = document.getElementById('foodCategory');
 
-        // Populate categories
-        const categories = FoodDatabase.getAllCategories();
-        categorySelect.innerHTML = '<option value="">Tutte le categorie</option>' +
-            categories.map(cat => `<option value="${cat.key}">${cat.name}</option>`).join('');
-
-        // Render all foods initially
-        this.renderFoodList(FoodDatabase.getAllFoods());
+        // Render all foods initially grouped by macro
+        this.renderFoodListByMacro();
 
         // Update selected foods display
         this.updateSelectedFoodsDisplay();
@@ -608,15 +782,7 @@ const App = {
         // Search handler
         searchInput.oninput = () => {
             const query = searchInput.value;
-            const category = categorySelect.value;
-            this.filterFoods(query, category);
-        };
-
-        // Category filter handler
-        categorySelect.onchange = () => {
-            const query = searchInput.value;
-            const category = categorySelect.value;
-            this.filterFoods(query, category);
+            this.filterFoodsByMacro(query);
         };
 
         // Calculate portions button handler
@@ -646,13 +812,13 @@ const App = {
     closeFoodModal() {
         const modal = document.getElementById('foodModal');
         modal.classList.remove('active');
+        delete modal.dataset.editingMealId;
         this.selectedFoods = [];
         this.calculatedPortions = null;
         this.currentMealTarget = null;
         
         // Reset search
         document.getElementById('foodSearch').value = '';
-        document.getElementById('foodCategory').value = '';
     },
 
     // Update selected foods display
@@ -896,21 +1062,104 @@ const App = {
     },
 
     // Filter and render foods
-    filterFoods(query, category) {
-        let foods = FoodDatabase.getAllFoods();
+    filterFoodsByMacro(query) {
+        let foodsByMacro = FoodDatabase.getFoodsByMacroCategory();
 
-        if (category) {
-            foods = foods.filter(f => f.category === category);
+        if (query && query.trim()) {
+            const lowerQuery = query.toLowerCase();
+            // Filter each macro category
+            Object.keys(foodsByMacro).forEach(macroKey => {
+                foodsByMacro[macroKey] = foodsByMacro[macroKey].filter(f => 
+                    f.name.toLowerCase().includes(lowerQuery)
+                );
+            });
         }
 
-        if (query) {
-            foods = foods.filter(f => f.name.toLowerCase().includes(query.toLowerCase()));
-        }
-
-        this.renderFoodList(foods);
+        this.renderFoodListByMacro(foodsByMacro);
     },
 
-    // Render food list
+    // Render food list grouped by macro-categories
+    renderFoodListByMacro(foodsByMacro = null) {
+        const foodList = document.getElementById('foodList');
+        
+        if (!foodsByMacro) {
+            foodsByMacro = FoodDatabase.getFoodsByMacroCategory();
+        }
+
+        const macroCategories = {
+            carboidrati: { name: '🍞 CARBOIDRATI', emoji: '🍞' },
+            proteine: { name: '🥩 PROTEINE', emoji: '🥩' },
+            grassi: { name: '🫒 GRASSI', emoji: '🫒' }
+        };
+
+        // Check if any foods exist
+        const totalFoods = Object.values(foodsByMacro).reduce((sum, foods) => sum + foods.length, 0);
+        if (totalFoods === 0) {
+            foodList.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">Nessun alimento trovato</p>';
+            return;
+        }
+
+        let html = '';
+        
+        Object.keys(macroCategories).forEach(macroKey => {
+            const foods = foodsByMacro[macroKey];
+            if (foods.length === 0) return;
+
+            const categoryInfo = macroCategories[macroKey];
+            
+            html += `
+                <div class="macro-category" data-macro="${macroKey}">
+                    <div class="macro-category-header" data-category="${macroKey}">
+                        <span class="macro-category-name">${categoryInfo.name}</span>
+                        <span class="macro-category-count">(${foods.length})</span>
+                        <span class="macro-category-toggle">▼</span>
+                    </div>
+                    <div class="macro-category-content" data-category="${macroKey}">
+                        ${foods.map(food => {
+                            const isSelected = this.selectedFoods && this.selectedFoods.some(f => f.name === food.name);
+                            return `
+                                <div class="food-item ${isSelected ? 'selected' : ''}" data-food="${food.name}">
+                                    <div class="food-item-name">${food.name}</div>
+                                    <div class="food-item-macros">
+                                        ${food.calories} kcal | P:${food.protein}g C:${food.carbs}g G:${food.fats}g
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        foodList.innerHTML = html;
+
+        // Add click handlers for category headers (expand/collapse)
+        foodList.querySelectorAll('.macro-category-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const category = header.dataset.category;
+                const content = foodList.querySelector(`.macro-category-content[data-category="${category}"]`);
+                const toggle = header.querySelector('.macro-category-toggle');
+                
+                if (content.style.display === 'none') {
+                    content.style.display = 'block';
+                    toggle.textContent = '▼';
+                } else {
+                    content.style.display = 'none';
+                    toggle.textContent = '▶';
+                }
+            });
+        });
+
+        // Add click handlers for food items
+        foodList.querySelectorAll('.food-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const foodName = item.dataset.food;
+                this.toggleFoodSelection(foodName);
+            });
+        });
+    },
+
+    // Render food list (old method for backward compatibility)
     renderFoodList(foods) {
         const foodList = document.getElementById('foodList');
         
@@ -967,7 +1216,7 @@ const App = {
             // Automatically calculate portions when adding a food
             this.calculateMealPortions();
             
-            this.renderFoodList(FoodDatabase.getAllFoods());
+            this.renderFoodListByMacro();
         }
     },
 

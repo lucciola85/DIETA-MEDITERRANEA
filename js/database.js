@@ -618,5 +618,58 @@ const FoodDatabase = {
             key,
             name: value
         }));
+    },
+
+    // Classify food by macro-nutrient predominance
+    classifyFoodByMacro(food) {
+        const categories = [];
+        const MACRO_THRESHOLDS = {
+            carbsRich: 15,      // g of carbs per 100g
+            proteinRich: 10,    // g of protein per 100g
+            fatsRich: 5         // g of fats per 100g
+        };
+        
+        if (food.carbs >= MACRO_THRESHOLDS.carbsRich) {
+            categories.push('carboidrati');
+        }
+        if (food.protein >= MACRO_THRESHOLDS.proteinRich) {
+            categories.push('proteine');
+        }
+        if (food.fats >= MACRO_THRESHOLDS.fatsRich) {
+            categories.push('grassi');
+        }
+        
+        // If not in any main category, classify by highest macro
+        if (categories.length === 0) {
+            const maxMacro = Math.max(food.carbs, food.protein, food.fats);
+            if (maxMacro === food.carbs) categories.push('carboidrati');
+            else if (maxMacro === food.protein) categories.push('proteine');
+            else categories.push('grassi');
+        }
+        
+        return categories;
+    },
+
+    // Get foods grouped by macro-category
+    getFoodsByMacroCategory() {
+        const categories = {
+            carboidrati: [],
+            proteine: [],
+            grassi: []
+        };
+        
+        this.foods.forEach(food => {
+            const macroCategories = this.classifyFoodByMacro(food);
+            macroCategories.forEach(cat => {
+                categories[cat].push(food);
+            });
+        });
+        
+        // Sort alphabetically each category
+        Object.keys(categories).forEach(cat => {
+            categories[cat].sort((a, b) => a.name.localeCompare(b.name));
+        });
+        
+        return categories;
     }
 };
