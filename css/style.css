@@ -1451,6 +1451,15 @@ body {
     flex-wrap: wrap;
 }
 
+/* Export Buttons */
+.export-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
 /* Print Styles */
 @media print {
     .sidebar,

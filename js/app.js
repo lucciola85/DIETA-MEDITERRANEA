@@ -124,8 +124,17 @@ const App = {
             this.exportShoppingList();
         });
 
+        document.getElementById('export-shopping-pdf')?.addEventListener('click', () => {
+            this.exportShoppingListPDF();
+        });
+
         document.getElementById('printShoppingList')?.addEventListener('click', () => {
             this.printShoppingList();
+        });
+
+        // Weekly menu PDF export
+        document.getElementById('export-menu-pdf')?.addEventListener('click', () => {
+            this.exportWeeklyMenuPDF();
         });
 
         // Backup
@@ -1568,6 +1577,64 @@ const App = {
         setTimeout(() => {
             toast.remove();
         }, 4000);
+    },
+
+    // Export shopping list to PDF
+    async exportShoppingListPDF() {
+        const profile = Profiles.getCurrentProfile();
+        if (!profile) {
+            this.showToast('Seleziona un profilo prima', 'error');
+            return;
+        }
+
+        const weekDates = Meals.getWeekDates(this.currentWeek);
+        const result = await Meals.generateShoppingList(profile.id, weekDates[0], weekDates[6]);
+        
+        if (result.summary.totalMeals === 0) {
+            this.showToast('Nessun pasto compilato per generare la lista', 'warning');
+            return;
+        }
+
+        try {
+            const weekStart = weekDates[0];
+            const weekEnd = weekDates[6];
+            const weekRange = `${weekStart.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })} - ${weekEnd.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+            
+            PDFExport.generateShoppingListPDF(result, weekRange);
+            this.showToast('PDF della lista spesa scaricato con successo!', 'success');
+        } catch (error) {
+            console.error('Error generating shopping list PDF:', error);
+            this.showToast('Errore nella generazione del PDF', 'error');
+        }
+    },
+
+    // Export weekly menu to PDF
+    async exportWeeklyMenuPDF() {
+        const profile = Profiles.getCurrentProfile();
+        if (!profile) {
+            this.showToast('Seleziona un profilo prima', 'error');
+            return;
+        }
+
+        const weekDates = Meals.getWeekDates(this.currentWeek);
+        
+        // Check if there are any meals in the week
+        const allMeals = (await Promise.all(
+            weekDates.map(date => Meals.getMealsByDate(profile.id, date))
+        )).flat();
+
+        if (allMeals.length === 0) {
+            this.showToast('Nessun pasto compilato per questa settimana', 'warning');
+            return;
+        }
+
+        try {
+            await PDFExport.generateWeeklyMenuPDF(profile.id, weekDates);
+            this.showToast('PDF del menù settimanale scaricato con successo!', 'success');
+        } catch (error) {
+            console.error('Error generating weekly menu PDF:', error);
+            this.showToast('Errore nella generazione del PDF', 'error');
+        }
     }
 };
 
