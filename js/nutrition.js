@@ -186,8 +186,8 @@ const Nutrition = {
         const factor = grams / 100;
 
         return {
-            calories: Math.ceil(food.calories * factor), // Calories always rounded up to integer
-            protein: this.roundUpToOneDecimal(food.protein * factor),
+            calories: Math.ceil(food.calories * factor), // Calories rounded up to integer (as per spec: "Calorie: 330")
+            protein: this.roundUpToOneDecimal(food.protein * factor), // Macros rounded up to 1 decimal
             carbs: this.roundUpToOneDecimal(food.carbs * factor),
             fats: this.roundUpToOneDecimal(food.fats * factor),
             fiber: this.roundUpToOneDecimal(food.fiber * factor)
@@ -392,37 +392,39 @@ const Nutrition = {
             fiber: sum.fiber + p.nutrition.fiber
         }), { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 });
         
-        // Round up all totals to 1 decimal
-        totalNutrition.calories = Math.ceil(totalNutrition.calories);
-        totalNutrition.protein = this.roundUpToOneDecimal(totalNutrition.protein);
-        totalNutrition.carbs = this.roundUpToOneDecimal(totalNutrition.carbs);
-        totalNutrition.fats = this.roundUpToOneDecimal(totalNutrition.fats);
-        totalNutrition.fiber = this.roundUpToOneDecimal(totalNutrition.fiber);
+        // Round up all totals to 1 decimal (returning new object for consistency)
+        const roundedNutrition = {
+            calories: Math.ceil(totalNutrition.calories),
+            protein: this.roundUpToOneDecimal(totalNutrition.protein),
+            carbs: this.roundUpToOneDecimal(totalNutrition.carbs),
+            fats: this.roundUpToOneDecimal(totalNutrition.fats),
+            fiber: this.roundUpToOneDecimal(totalNutrition.fiber)
+        };
 
         // Calculate adherence for each macro
         const adherence = {
             calories: {
-                level: this.getMacroAdherence(totalNutrition.calories, targetMacros.calories),
+                level: this.getMacroAdherence(roundedNutrition.calories, targetMacros.calories),
                 deviation: targetMacros.calories > 0 ? 
-                    Math.abs((totalNutrition.calories - targetMacros.calories) / targetMacros.calories * 100) : 0,
+                    Math.abs((roundedNutrition.calories - targetMacros.calories) / targetMacros.calories * 100) : 0,
                 icon: ''
             },
             protein: {
-                level: this.getMacroAdherence(totalNutrition.protein, targetMacros.protein),
+                level: this.getMacroAdherence(roundedNutrition.protein, targetMacros.protein),
                 deviation: targetMacros.protein > 0 ? 
-                    Math.abs((totalNutrition.protein - targetMacros.protein) / targetMacros.protein * 100) : 0,
+                    Math.abs((roundedNutrition.protein - targetMacros.protein) / targetMacros.protein * 100) : 0,
                 icon: ''
             },
             carbs: {
-                level: this.getMacroAdherence(totalNutrition.carbs, targetMacros.carbs),
+                level: this.getMacroAdherence(roundedNutrition.carbs, targetMacros.carbs),
                 deviation: targetMacros.carbs > 0 ? 
-                    Math.abs((totalNutrition.carbs - targetMacros.carbs) / targetMacros.carbs * 100) : 0,
+                    Math.abs((roundedNutrition.carbs - targetMacros.carbs) / targetMacros.carbs * 100) : 0,
                 icon: ''
             },
             fats: {
-                level: this.getMacroAdherence(totalNutrition.fats, targetMacros.fats),
+                level: this.getMacroAdherence(roundedNutrition.fats, targetMacros.fats),
                 deviation: targetMacros.fats > 0 ? 
-                    Math.abs((totalNutrition.fats - targetMacros.fats) / targetMacros.fats * 100) : 0,
+                    Math.abs((roundedNutrition.fats - targetMacros.fats) / targetMacros.fats * 100) : 0,
                 icon: ''
             }
         };
@@ -460,7 +462,7 @@ const Nutrition = {
         
         // Check overall balance
         if (adherence.calories.level === 'poor') {
-            if (totalNutrition.calories < targetMacros.calories * 0.85) {
+            if (roundedNutrition.calories < targetMacros.calories * 0.85) {
                 suggestions.push('⚠️ Calorie troppo basse - aumenta le porzioni');
             } else {
                 suggestions.push('⚠️ Calorie troppo alte - riduci le porzioni');
@@ -468,7 +470,7 @@ const Nutrition = {
         }
 
         return {
-            totalNutrition,
+            totalNutrition: roundedNutrition,
             adherence,
             suggestions
         };
