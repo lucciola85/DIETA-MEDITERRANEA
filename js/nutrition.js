@@ -3,6 +3,15 @@
  */
 
 const Nutrition = {
+    // Thresholds for food classification (g per 100g)
+    PROTEIN_RICH_THRESHOLD: 10,
+    CARB_RICH_THRESHOLD: 15,
+    FAT_RICH_THRESHOLD: 5,
+    
+    // Macro adjustment factors for optimization
+    MACRO_ADJUSTMENT_INCREASE: 1.05,
+    MACRO_ADJUSTMENT_DECREASE: 0.95,
+    
     // Activity levels for TDEE calculation
     activityLevels: {
         sedentary: 1.2,
@@ -161,7 +170,8 @@ const Nutrition = {
             carbs: Math.round(dailyMacros.carbs.grams * percentage),
             protein: Math.round(dailyMacros.protein.grams * percentage),
             fats: Math.round(dailyMacros.fats.grams * percentage),
-            calories: Math.round(dailyMacros.total.calories * percentage)
+            calories: Math.round(dailyMacros.total.calories * percentage),
+            fiber: Math.round((dailyMacros.fiber?.grams || 25) * percentage) // 25g is recommended daily target
         };
     },
 
@@ -177,6 +187,20 @@ const Nutrition = {
             fats: parseFloat((food.fats * factor).toFixed(1)),
             fiber: parseFloat((food.fiber * factor).toFixed(1))
         };
+    },
+
+    // Round grams to practical values for weighing
+    // Under 50g: round to 5g
+    // 50-200g: round to 10g  
+    // Over 200g: round to 25g
+    roundToPracticalGrams(grams) {
+        if (grams < 50) {
+            return Math.round(grams / 5) * 5;
+        } else if (grams < 200) {
+            return Math.round(grams / 10) * 10;
+        } else {
+            return Math.round(grams / 25) * 25;
+        }
     },
 
     // Calculate total nutrition for a meal
@@ -196,14 +220,34 @@ const Nutrition = {
     // AUTOMATIC PORTION CALCULATION
     // Given a list of foods (max 5), calculate optimal portions to match target macros
     calculateOptimalPortions(foods, targetMacros) {
-        // Validate input
-        if (!foods || foods.length === 0) {
+        // Improved input validation
+        if (!foods || !Array.isArray(foods) || foods.length === 0) {
+            console.warn('No foods provided for portion calculation');
             return [];
         }
         
-        if (foods.length > 5) {
+        if (!targetMacros || !targetMacros.calories || targetMacros.calories <= 0) {
+            console.error('Invalid target macros');
+            return [];
+        }
+        
+        // Filter foods with invalid data
+        const validFoods = foods.filter(food => 
+            food && 
+            typeof food.calories === 'number' && 
+            food.calories > 0
+        );
+        
+        if (validFoods.length === 0) {
+            console.warn('No valid foods after filtering');
+            return [];
+        }
+        
+        if (validFoods.length > 5) {
             console.warn('Maximum 5 ingredients allowed. Using first 5.');
-            foods = foods.slice(0, 5);
+            foods = validFoods.slice(0, 5);
+        } else {
+            foods = validFoods;
         }
 
         // Start with equal calories distribution
@@ -215,8 +259,8 @@ const Nutrition = {
             // grams = (calories * 100) / food.calories
             let grams = (caloriesPerFood * 100) / food.calories;
             
-            // Round to reasonable portions (5g increments)
-            grams = Math.round(grams / 5) * 5;
+            // Round to practical portions using new function
+            grams = this.roundToPracticalGrams(grams);
             
             // Apply constraints: minimum 10g, maximum 500g per food item
             grams = Math.max(10, Math.min(500, grams));
@@ -232,11 +276,6 @@ const Nutrition = {
         // This optimization tries to match calories first, then balance macros
         // 20 iterations provide good balance between accuracy and performance
         const MAX_ITERATIONS = 20;
-        const PROTEIN_RICH_THRESHOLD = 10; // g per 100g
-        const CARB_RICH_THRESHOLD = 15; // g per 100g
-        const FAT_RICH_THRESHOLD = 5; // g per 100g
-        const MACRO_ADJUSTMENT_INCREASE = 1.05;
-        const MACRO_ADJUSTMENT_DECREASE = 0.95;
         
         for (let i = 0; i < MAX_ITERATIONS; i++) {
             const currentTotal = portions.reduce((sum, p) => ({
@@ -270,29 +309,29 @@ const Nutrition = {
                 
                 // Secondary goal: balance macros based on food's macro profile
                 // If we need more protein and this food is protein-rich, increase it slightly
-                if (proteinDiff < 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
-                } else if (proteinDiff > 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                if (proteinDiff < 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                } else if (proteinDiff > 0 && portion.food.protein > this.PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // If we need more carbs and this food is carb-rich, increase it
-                if (carbsDiff < 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
-                } else if (carbsDiff > 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                if (carbsDiff < 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                } else if (carbsDiff > 0 && portion.food.carbs > this.CARB_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // If we need more fats and this food is fat-rich, increase it
-                if (fatsDiff < 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
-                } else if (fatsDiff > 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
-                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                if (fatsDiff < 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_INCREASE;
+                } else if (fatsDiff > 0 && portion.food.fats > this.FAT_RICH_THRESHOLD) {
+                    adjustment *= this.MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // Apply adjustment
                 let newGrams = portion.grams * adjustment;
-                newGrams = Math.round(newGrams / 5) * 5;
+                newGrams = this.roundToPracticalGrams(newGrams);
                 newGrams = Math.max(10, Math.min(500, newGrams));
                 
                 portion.grams = newGrams;
@@ -381,10 +420,10 @@ const Nutrition = {
         // Generate suggestions
         const suggestions = [];
         
-        // Check if any food category is missing (using same thresholds as optimization)
-        const hasProteinSource = portions.some(p => p.food.protein > PROTEIN_RICH_THRESHOLD);
-        const hasCarbSource = portions.some(p => p.food.carbs > CARB_RICH_THRESHOLD);
-        const hasFatSource = portions.some(p => p.food.fats > FAT_RICH_THRESHOLD);
+        // Check if any food category is missing (using module-level thresholds)
+        const hasProteinSource = portions.some(p => p.food.protein > this.PROTEIN_RICH_THRESHOLD);
+        const hasCarbSource = portions.some(p => p.food.carbs > this.CARB_RICH_THRESHOLD);
+        const hasFatSource = portions.some(p => p.food.fats > this.FAT_RICH_THRESHOLD);
         
         if (!hasProteinSource && adherence.protein.level !== 'excellent') {
             suggestions.push('💡 Aggiungi una fonte proteica (pesce, carne, legumi, uova)');
