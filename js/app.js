@@ -974,10 +974,16 @@ const App = {
         const endDate = weekDates[6];
 
         try {
-            const shoppingList = await Meals.generateShoppingList(profile.id, startDate, endDate);
-            this.renderShoppingList(shoppingList);
-            document.getElementById('exportShoppingList').style.display = 'inline-block';
-            this.showToast('Lista della spesa generata', 'success');
+            const result = await Meals.generateShoppingList(profile.id, startDate, endDate);
+            this.renderShoppingList(result);
+            
+            // Show/hide export button based on whether there are meals
+            const actionsContainer = document.querySelector('.shopping-actions');
+            if (actionsContainer) {
+                actionsContainer.style.display = result.summary.totalMeals > 0 ? 'flex' : 'none';
+            }
+            
+            this.showToast(result.summary.message, result.summary.totalMeals > 0 ? 'success' : 'info');
         } catch (error) {
             console.error('Error generating shopping list:', error);
             this.showToast('Errore nella generazione della lista', 'error');
@@ -985,38 +991,68 @@ const App = {
     },
 
     // Render shopping list
-    renderShoppingList(shoppingList) {
+    renderShoppingList(result) {
         const container = document.getElementById('shoppingList');
         const actionsContainer = document.querySelector('.shopping-actions');
 
-        if (Object.keys(shoppingList).length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #999;">Nessun alimento nella lista</p>';
+        // Build summary HTML
+        const summaryHtml = `
+            <div class="shopping-list-summary">
+                <h4>📊 Riepilogo</h4>
+                <p>${result.summary.message}</p>
+                ${result.summary.totalMeals > 0 ? `
+                    <details>
+                        <summary>Giorni inclusi (${result.summary.totalDays})</summary>
+                        <ul>
+                            ${result.summary.mealsIncluded.map(m => 
+                                `<li>${m.day} - ${m.mealType}</li>`
+                            ).join('')}
+                        </ul>
+                    </details>
+                ` : ''}
+            </div>
+        `;
+
+        // If no meals
+        if (result.summary.totalMeals === 0) {
+            container.innerHTML = `
+                ${summaryHtml}
+                <div class="empty-state">
+                    <p>🛒 Nessun ingrediente da mostrare</p>
+                    <p>Vai al <strong>Pianificatore Pasti</strong> e compila almeno un pasto per generare la lista della spesa.</p>
+                </div>
+            `;
             if (actionsContainer) actionsContainer.style.display = 'none';
             return;
         }
 
-        const html = Object.keys(shoppingList).map(categoryKey => {
+        // Build shopping list HTML
+        let listHtml = summaryHtml + '<div class="shopping-list-items">';
+        
+        Object.keys(result.items).forEach(categoryKey => {
             const categoryName = FoodDatabase.getCategoryName(categoryKey);
-            const items = shoppingList[categoryKey];
-
-            return `
+            listHtml += `
                 <div class="shopping-category">
                     <h3>${categoryName}</h3>
                     <div class="shopping-items">
-                        ${items.map(item => `
+                        ${result.items[categoryKey].map(item => `
                             <div class="shopping-item">
                                 <input type="checkbox" id="shop-${categoryKey}-${item.name}">
                                 <label for="shop-${categoryKey}-${item.name}">
-                                    ${item.name} - ${item.grams}g
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-quantity">${item.grams}g</span>
+                                    ${item.occurrences > 1 ? `<span class="item-occurrences">(usato ${item.occurrences}x)</span>` : ''}
                                 </label>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
-        }).join('');
-
-        container.innerHTML = html;
+        });
+        
+        listHtml += '</div>';
+        
+        container.innerHTML = listHtml;
 
         // Show action buttons
         if (actionsContainer) actionsContainer.style.display = 'flex';
@@ -1033,9 +1069,9 @@ const App = {
     async exportShoppingList() {
         const profile = Profiles.getCurrentProfile();
         const weekDates = Meals.getWeekDates(this.currentWeek);
-        const shoppingList = await Meals.generateShoppingList(profile.id, weekDates[0], weekDates[6]);
+        const result = await Meals.generateShoppingList(profile.id, weekDates[0], weekDates[6]);
         
-        const text = Meals.exportShoppingListToText(shoppingList);
+        const text = Meals.exportShoppingListToText(result.items);
         
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);

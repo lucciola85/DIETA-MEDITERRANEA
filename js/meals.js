@@ -145,21 +145,48 @@ const Meals = {
     async generateShoppingList(profileId, startDate, endDate) {
         const meals = await this.getMealsByDateRange(profileId, startDate, endDate);
         
+        // If no meals, return empty result with message
+        if (!meals || meals.length === 0) {
+            return {
+                items: {},
+                summary: {
+                    totalMeals: 0,
+                    daysIncluded: [],
+                    message: 'Nessun pasto compilato nel periodo selezionato. Compila almeno un pasto per generare la lista.'
+                }
+            };
+        }
+        
+        // Track which days and meals are included
+        const daysIncluded = new Set();
+        const mealsIncluded = [];
+        
         // Aggregate all food items
         const foodMap = new Map();
         
         meals.forEach(meal => {
+            // Track the day
+            const mealDate = this.formatDate(new Date(meal.date));
+            daysIncluded.add(mealDate);
+            mealsIncluded.push({
+                date: mealDate,
+                day: this.getDayName(meal.date),
+                mealType: Nutrition.getMealTypeName(meal.mealType)
+            });
+            
+            // Aggregate the ingredients
             meal.foodItems.forEach(item => {
                 const existing = foodMap.get(item.foodName);
                 if (existing) {
                     existing.grams += item.grams;
+                    existing.occurrences += 1;
                 } else {
-                    // Get category from database
                     const food = FoodDatabase.getFoodByName(item.foodName);
                     foodMap.set(item.foodName, {
                         name: item.foodName,
                         grams: item.grams,
-                        category: food ? food.category : 'other'
+                        category: food ? food.category : 'other',
+                        occurrences: 1
                     });
                 }
             });
@@ -173,7 +200,8 @@ const Meals = {
             }
             shoppingList[item.category].push({
                 name: item.name,
-                grams: Nutrition.roundUpToOneDecimal(item.grams) // Round up to 1 decimal
+                grams: Math.ceil(item.grams), // Round up to integer
+                occurrences: item.occurrences
             });
         });
 
@@ -182,7 +210,16 @@ const Meals = {
             shoppingList[category].sort((a, b) => a.name.localeCompare(b.name));
         });
 
-        return shoppingList;
+        return {
+            items: shoppingList,
+            summary: {
+                totalMeals: meals.length,
+                totalDays: daysIncluded.size,
+                daysIncluded: Array.from(daysIncluded).sort(),
+                mealsIncluded: mealsIncluded,
+                message: `Lista generata da ${meals.length} pasti in ${daysIncluded.size} giorni`
+            }
+        };
     },
 
     // Calculate daily nutrition summary
