@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Piattaforma Dieta Mediterranea e Allenamento Personale">
+    <meta name="theme-color" content="#006994">
+    <title>Dieta Mediterranea & Allenamento</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Profile Selection Screen -->
+    <div id="profileScreen" class="screen active">
+        <div class="container">
+            <div class="header">
+                <h1>🌊 Dieta Mediterranea & Allenamento</h1>
+                <p>Seleziona o crea un profilo per iniziare</p>
+            </div>
+            <div id="profileList" class="profile-list"></div>
+            <button id="createProfileBtn" class="btn btn-primary">+ Crea Nuovo Profilo</button>
+        </div>
+    </div>
+
+    <!-- Profile Creation/Edit Screen -->
+    <div id="profileFormScreen" class="screen">
+        <div class="container">
+            <div class="header">
+                <h2 id="profileFormTitle">Crea Nuovo Profilo</h2>
+            </div>
+            <form id="profileForm" class="form">
+                <div class="form-group">
+                    <label for="profileName">Nome *</label>
+                    <input type="text" id="profileName" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileAge">Età *</label>
+                    <input type="number" id="profileAge" min="15" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileGender">Sesso *</label>
+                    <select id="profileGender" required>
+                        <option value="">Seleziona...</option>
+                        <option value="male">Maschio</option>
+                        <option value="female">Femmina</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profileHeight">Altezza (cm) *</label>
+                    <input type="number" id="profileHeight" min="120" max="250" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileWeight">Peso (kg) *</label>
+                    <input type="number" id="profileWeight" min="30" max="300" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label>BMI Calcolato</label>
+                    <div id="bmiDisplay" class="bmi-display">--</div>
+                </div>
+                <div class="form-group">
+                    <label for="profileActivity">Pratica attività sportiva? *</label>
+                    <select id="profileActivity" required>
+                        <option value="">Seleziona...</option>
+                        <option value="yes">Sì</option>
+                        <option value="no">No</option>
+                    </select>
+                    <small>Se NO, l'allenamento partirà dal livello PRINCIPIANTE</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelProfileBtn" class="btn btn-secondary">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva Profilo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Screen -->
+    <div id="appScreen" class="screen">
+        <!-- Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>🌊 Dieta Med</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-link active" data-page="dashboard">📊 Dashboard</a></li>
+                <li><a href="#meals" class="nav-link" data-page="meals">🍽️ Pianificatore Pasti</a></li>
+                <li><a href="#shopping" class="nav-link" data-page="shopping">🛒 Lista Spesa</a></li>
+                <li><a href="#weight" class="nav-link" data-page="weight">⚖️ Peso</a></li>
+                <li><a href="#workout" class="nav-link" data-page="workout">💪 Allenamento</a></li>
+                <li><a href="#profile" class="nav-link" data-page="profile">👤 Profilo</a></li>
+                <li><a href="#backup" class="nav-link" data-page="backup">💾 Backup</a></li>
+            </ul>
+            <div class="nav-footer">
+                <button id="changeProfileBtn" class="btn btn-secondary btn-small">Cambia Profilo</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="page active">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p id="profileWelcome"></p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>TDEE</h3>
+                        <p class="stat-value" id="tdeeValue">--</p>
+                        <small>kcal/giorno</small>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Target Calorico</h3>
+                        <p class="stat-value" id="targetCalories">--</p>
+                        <small>kcal/giorno (deficit)</small>
+                    </div>
+                    <div class="stat-card">
+                        <h3>BMI</h3>
+                        <p class="stat-value" id="bmiValue">--</p>
+                        <small id="bmiCategory">--</small>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Peso Attuale</h3>
+                        <p class="stat-value" id="currentWeight">--</p>
+                        <small>kg</small>
+                    </div>
+                </div>
+                <div class="macro-targets">
+                    <h2>Target Macro Giornalieri</h2>
+                    <div class="macro-grid">
+                        <div class="macro-card carbs">
+                            <h4>Carboidrati</h4>
+                            <p class="macro-value" id="carbsTarget">--</p>
+                            <small>50-55% calorie</small>
+                        </div>
+                        <div class="macro-card protein">
+                            <h4>Proteine</h4>
+                            <p class="macro-value" id="proteinTarget">--</p>
+                            <small>15-20% calorie (min 1.2g/kg)</small>
+                        </div>
+                        <div class="macro-card fats">
+                            <h4>Grassi</h4>
+                            <p class="macro-value" id="fatsTarget">--</p>
+                            <small>25-30% calorie</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="today-meals">
+                    <h2>Pasti di Oggi</h2>
+                    <div id="todayMealsSummary"></div>
+                </div>
+            </div>
+
+            <!-- Meals Page -->
+            <div id="mealsPage" class="page">
+                <div class="page-header">
+                    <h1>Pianificatore Pasti</h1>
+                    <div class="week-selector">
+                        <button id="prevWeek" class="btn btn-icon">←</button>
+                        <span id="currentWeek"></span>
+                        <button id="nextWeek" class="btn btn-icon">→</button>
+                    </div>
+                </div>
+                <div class="day-tabs" id="dayTabs"></div>
+                <div class="meals-container" id="mealsContainer"></div>
+            </div>
+
+            <!-- Shopping List Page -->
+            <div id="shoppingPage" class="page">
+                <div class="page-header">
+                    <h1>Lista della Spesa</h1>
+                    <button id="generateShoppingList" class="btn btn-primary">Genera Lista Settimanale</button>
+                </div>
+                <div id="shoppingList" class="shopping-list"></div>
+                <button id="exportShoppingList" class="btn btn-secondary" style="display:none;">📄 Esporta Lista</button>
+            </div>
+
+            <!-- Weight Tracking Page -->
+            <div id="weightPage" class="page">
+                <div class="page-header">
+                    <h1>Monitoraggio Peso</h1>
+                    <button id="addWeightBtn" class="btn btn-primary">+ Aggiungi Peso</button>
+                </div>
+                <div id="weightForm" class="weight-form" style="display:none;">
+                    <form id="weightEntryForm">
+                        <div class="form-row">
+                            <input type="date" id="weightDate" required>
+                            <input type="number" id="weightValue" placeholder="Peso (kg)" step="0.1" min="30" max="300" required>
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" id="cancelWeightBtn" class="btn btn-secondary">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="weight-stats">
+                    <div class="stat-card">
+                        <h3>Peso Iniziale</h3>
+                        <p class="stat-value" id="initialWeight">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Peso Attuale</h3>
+                        <p class="stat-value" id="latestWeight">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Variazione</h3>
+                        <p class="stat-value" id="weightChange">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Media Settimanale</h3>
+                        <p class="stat-value" id="weeklyAverage">--</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weightChart"></canvas>
+                </div>
+                <div id="weightHistory" class="weight-history"></div>
+            </div>
+
+            <!-- Workout Page -->
+            <div id="workoutPage" class="page">
+                <div class="page-header">
+                    <h1>Scheda Allenamento</h1>
+                    <select id="workoutLevel" class="workout-level-select">
+                        <option value="beginner">Principiante</option>
+                        <option value="intermediate">Intermedio</option>
+                        <option value="advanced">Avanzato</option>
+                    </select>
+                </div>
+                <div id="workoutSchedule" class="workout-schedule"></div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profilePage" class="page">
+                <div class="page-header">
+                    <h1>Il Tuo Profilo</h1>
+                    <button id="editProfileBtn" class="btn btn-primary">Modifica Profilo</button>
+                </div>
+                <div id="profileDetails" class="profile-details"></div>
+                <button id="deleteProfileBtn" class="btn btn-danger">Elimina Profilo</button>
+            </div>
+
+            <!-- Backup Page -->
+            <div id="backupPage" class="page">
+                <div class="page-header">
+                    <h1>Backup e Ripristino</h1>
+                </div>
+                <div class="backup-section">
+                    <h2>Esporta Dati</h2>
+                    <p>Scarica tutti i tuoi dati in formato JSON</p>
+                    <button id="exportDataBtn" class="btn btn-primary">📥 Esporta Dati</button>
+                </div>
+                <div class="backup-section">
+                    <h2>Importa Dati</h2>
+                    <p>Ripristina i dati da un file di backup</p>
+                    <input type="file" id="importFile" accept=".json" style="display:none;">
+                    <button id="importDataBtn" class="btn btn-secondary">📤 Importa Dati</button>
+                </div>
+                <div id="backupStatus" class="backup-status"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Food Selector Modal -->
+    <div id="foodModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Seleziona Alimento</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="foodSearch" placeholder="Cerca alimento..." class="search-input">
+                <select id="foodCategory" class="category-select">
+                    <option value="">Tutte le categorie</option>
+                </select>
+                <div id="foodList" class="food-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/profiles.js"></script>
+    <script src="js/nutrition.js"></script>
+    <script src="js/meals.js"></script>
+    <script src="js/workout.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
