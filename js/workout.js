@@ -32,6 +32,7 @@ const Workout = {
             equipment: 'dumbbells',
             muscleGroup: 'Braccia',
             description: 'Esercizio di isolamento per i bicipiti',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-bicep-curl.gif',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, gambe larghezza spalle, schiena dritta
@@ -71,6 +72,7 @@ const Workout = {
             equipment: 'dumbbells',
             muscleGroup: 'Braccia',
             description: 'Esercizio di isolamento per i tricipiti',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/10/dumbbell-overhead-tricep-extension.gif',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi o seduti, schiena dritta
@@ -108,6 +110,7 @@ const Workout = {
             equipment: 'dumbbells',
             muscleGroup: 'Spalle',
             description: 'Esercizio composto per deltoidi anteriori e mediali',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-shoulder-press.gif',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi o seduti con supporto lombare
@@ -146,6 +149,7 @@ const Workout = {
             name: 'Alzate Laterali',
             equipment: 'dumbbells',
             muscleGroup: 'Spalle',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-lateral-raise.gif',
             description: 'Isolamento per deltoidi mediali',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
@@ -185,6 +189,7 @@ const Workout = {
             name: 'Chest Press con Manubri',
             equipment: 'dumbbells',
             muscleGroup: 'Petto',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-chest-press.gif',
             description: 'Esercizio composto per pettorali, deltoidi anteriori e tricipiti',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
@@ -225,6 +230,7 @@ const Workout = {
             name: 'Aperture con Manubri (Chest Fly)',
             equipment: 'dumbbells',
             muscleGroup: 'Petto',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-chest-fly.gif',
             description: 'Isolamento per pettorali',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
@@ -305,6 +311,7 @@ const Workout = {
             name: 'Squat con Manubri',
             equipment: 'dumbbells',
             muscleGroup: 'Gambe',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-squat.gif',
             description: 'Esercizio composto per quadricipiti, glutei e core',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
@@ -891,6 +898,7 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Petto',
             description: 'Flessioni classiche a terra',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/push-up.gif',
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Posizione plank: mani larghezza spalle o poco più
@@ -1029,6 +1037,7 @@ const Workout = {
         },
         plank: {
             name: 'Plank (Tenuta Isometrica)',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/plank.gif',
             equipment: 'bodyweight',
             muscleGroup: 'Core',
             description: 'Esercizio isometrico per core e stabilità',
@@ -1082,6 +1091,7 @@ const Workout = {
         },
         crunches: {
             name: 'Crunch Addominali',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/crunch.gif',
             equipment: 'bodyweight',
             muscleGroup: 'Addominali',
             description: 'Crunch classici per addominali',
@@ -1131,6 +1141,7 @@ const Workout = {
         },
         mountainClimbers: {
             name: 'Mountain Climbers',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/mountain-climber.gif',
             equipment: 'bodyweight',
             muscleGroup: 'Full Body',
             description: 'Esercizio dinamico cardio e core',
@@ -1179,6 +1190,7 @@ const Workout = {
         },
         burpees: {
             name: 'Burpees',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/burpee.gif',
             equipment: 'bodyweight',
             muscleGroup: 'Full Body',
             description: 'Esercizio completo full body',
@@ -1241,6 +1253,7 @@ const Workout = {
         },
         jumpingJacks: {
             name: 'Jumping Jacks',
+            imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/jumping-jack.gif',
             equipment: 'bodyweight',
             muscleGroup: 'Cardio',
             description: 'Salti con apertura gambe e braccia',
