@@ -1490,6 +1490,7 @@ const App = {
                                                     📖 Vedi spiegazione dettagliata
                                                 </button>
                                                 <div class="exercise-detailed-description" id="details-${ex.exercise}" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-left: 3px solid var(--primary); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                                    ${ExerciseVideos.renderVideoEmbed(exercise)}
                                                     ${exercise.imageUrl ? `
                                                         <div style="text-align: center; margin-bottom: 1rem;">
                                                             <img src="${exercise.imageUrl}" alt="${exercise.name}" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.display='none'">

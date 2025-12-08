@@ -33,6 +33,10 @@ const Workout = {
             muscleGroup: 'Braccia',
             description: 'Esercizio di isolamento per i bicipiti',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-bicep-curl.gif',
+            videos: {
+                it: 'https://www.youtube.com/embed/ykJmrZ5v0Oo',
+                en: 'https://www.youtube.com/embed/ykJmrZ5v0Oo'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, gambe larghezza spalle, schiena dritta
@@ -73,6 +77,10 @@ const Workout = {
             muscleGroup: 'Braccia',
             description: 'Esercizio di isolamento per i tricipiti',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/10/dumbbell-overhead-tricep-extension.gif',
+            videos: {
+                it: 'https://www.youtube.com/embed/nRiJVZDpdL0',
+                en: 'https://www.youtube.com/embed/nRiJVZDpdL0'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi o seduti, schiena dritta
@@ -111,6 +119,10 @@ const Workout = {
             muscleGroup: 'Spalle',
             description: 'Esercizio composto per deltoidi anteriori e mediali',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-shoulder-press.gif',
+            videos: {
+                it: 'https://www.youtube.com/embed/qEwKCR5JCog',
+                en: 'https://www.youtube.com/embed/qEwKCR5JCog'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi o seduti con supporto lombare
@@ -151,6 +163,10 @@ const Workout = {
             muscleGroup: 'Spalle',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-lateral-raise.gif',
             description: 'Isolamento per deltoidi mediali',
+            videos: {
+                it: 'https://www.youtube.com/embed/3VcKaXpzqRo',
+                en: 'https://www.youtube.com/embed/3VcKaXpzqRo'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, gambe leggermente divaricate
@@ -191,6 +207,10 @@ const Workout = {
             muscleGroup: 'Petto',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-chest-press.gif',
             description: 'Esercizio composto per pettorali, deltoidi anteriori e tricipiti',
+            videos: {
+                it: 'https://www.youtube.com/embed/VmB1G1K7v94',
+                en: 'https://www.youtube.com/embed/VmB1G1K7v94'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Sdraiati sulla panca piana
@@ -232,6 +252,10 @@ const Workout = {
             muscleGroup: 'Petto',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-chest-fly.gif',
             description: 'Isolamento per pettorali',
+            videos: {
+                it: 'https://www.youtube.com/embed/eozdVDA78K0',
+                en: 'https://www.youtube.com/embed/eozdVDA78K0'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Sdraiati sulla panca piana
@@ -272,6 +296,10 @@ const Workout = {
             equipment: 'dumbbells',
             muscleGroup: 'Schiena',
             description: 'Esercizio composto per dorsali, romboidi e trapezi',
+            videos: {
+                it: 'https://www.youtube.com/embed/roCP6wCXPqo',
+                en: 'https://www.youtube.com/embed/roCP6wCXPqo'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Piedi larghezza spalle, ginocchia leggermente piegate
@@ -313,6 +341,10 @@ const Workout = {
             muscleGroup: 'Gambe',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/dumbbell-squat.gif',
             description: 'Esercizio composto per quadricipiti, glutei e core',
+            videos: {
+                it: 'https://www.youtube.com/embed/aclHkVaku9U',
+                en: 'https://www.youtube.com/embed/aclHkVaku9U'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, piedi larghezza spalle o leggermente più larghi
@@ -355,6 +387,10 @@ const Workout = {
             equipment: 'dumbbells',
             muscleGroup: 'Gambe',
             description: 'Esercizio unilaterale per gambe e glutei',
+            videos: {
+                it: 'https://www.youtube.com/embed/QOVaHwm-Q6U',
+                en: 'https://www.youtube.com/embed/QOVaHwm-Q6U'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, piedi larghezza anche
@@ -899,6 +935,10 @@ const Workout = {
             muscleGroup: 'Petto',
             description: 'Flessioni classiche a terra',
             imageUrl: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/02/push-up.gif',
+            videos: {
+                it: 'https://www.youtube.com/embed/IODxDxX7oi4',
+                en: 'https://www.youtube.com/embed/IODxDxX7oi4'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Posizione plank: mani larghezza spalle o poco più
@@ -949,6 +989,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Gambe',
             description: 'Squat fondamentale senza peso',
+            videos: {
+                it: 'https://www.youtube.com/embed/aclHkVaku9U',
+                en: 'https://www.youtube.com/embed/aclHkVaku9U'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Piedi larghezza spalle o poco più
@@ -997,6 +1041,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Gambe',
             description: 'Affondi alternati senza peso',
+            videos: {
+                it: 'https://www.youtube.com/embed/QOVaHwm-Q6U',
+                en: 'https://www.youtube.com/embed/QOVaHwm-Q6U'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, piedi larghezza anche
@@ -1041,6 +1089,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Core',
             description: 'Esercizio isometrico per core e stabilità',
+            videos: {
+                it: 'https://www.youtube.com/embed/ASdvN_XEl_c',
+                en: 'https://www.youtube.com/embed/ASdvN_XEl_c'
+            },
             detailedDescription: `
 <strong>POSIZIONE:</strong>
 • Appoggio su avambracci e punte dei piedi
@@ -1095,6 +1147,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Addominali',
             description: 'Crunch classici per addominali',
+            videos: {
+                it: 'https://www.youtube.com/embed/Xyd_fa5zoEU',
+                en: 'https://www.youtube.com/embed/Xyd_fa5zoEU'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Sdraiati supini (a pancia in su)
@@ -1145,6 +1201,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Full Body',
             description: 'Esercizio dinamico cardio e core',
+            videos: {
+                it: 'https://www.youtube.com/embed/nmwgirgXLYM',
+                en: 'https://www.youtube.com/embed/nmwgirgXLYM'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Posizione plank alta (braccia estese)
@@ -1194,6 +1254,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Full Body',
             description: 'Esercizio completo full body',
+            videos: {
+                it: 'https://www.youtube.com/embed/TU8QYVW0gDU',
+                en: 'https://www.youtube.com/embed/TU8QYVW0gDU'
+            },
             detailedDescription: `
 <strong>SEQUENZA COMPLETA:</strong>
 
@@ -1257,6 +1321,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Cardio',
             description: 'Salti con apertura gambe e braccia',
+            videos: {
+                it: 'https://www.youtube.com/embed/c4DAnQ6DtF8',
+                en: 'https://www.youtube.com/embed/c4DAnQ6DtF8'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, gambe unite
@@ -1317,6 +1385,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Cardio',
             description: 'Corsa sul posto portando le ginocchia in alto',
+            videos: {
+                it: 'https://www.youtube.com/embed/8opcQdC-V-U',
+                en: 'https://www.youtube.com/embed/8opcQdC-V-U'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • In piedi, postura eretta
@@ -1372,6 +1444,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Addominali',
             description: 'Esercizio per addominali bassi',
+            videos: {
+                it: 'https://www.youtube.com/embed/JB2oyawG9KI',
+                en: 'https://www.youtube.com/embed/JB2oyawG9KI'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Sdraiato supino (a pancia in su)
@@ -1426,6 +1502,10 @@ const Workout = {
             equipment: 'bodyweight',
             muscleGroup: 'Glutei',
             description: 'Esercizio di attivazione glutei',
+            videos: {
+                it: 'https://www.youtube.com/embed/OUgsJ8-Vi0E',
+                en: 'https://www.youtube.com/embed/OUgsJ8-Vi0E'
+            },
             detailedDescription: `
 <strong>POSIZIONE DI PARTENZA:</strong>
 • Sdraiato supino (a pancia in su)
@@ -1705,5 +1785,92 @@ const Workout = {
         }
         // Default to intermediate for users who have activity
         return 'intermediate';
+    }
+};
+
+/**
+ * ExerciseVideos - Utility for managing exercise video tutorials
+ */
+const ExerciseVideos = {
+    // Validate YouTube URL for security
+    isValidYouTubeUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        
+        // Only allow YouTube embed URLs with safe query parameters
+        // Pattern allows optional query parameters like ?start=30 but validates format
+        const validPattern = /^https:\/\/(www\.)?youtube\.com\/embed\/[a-zA-Z0-9_-]{11}(\?[a-zA-Z0-9_=&-]*)?$/;
+        
+        return validPattern.test(url);
+    },
+    
+    // Get video URL for an exercise with language preference
+    getVideoUrl(exercise, preferredLanguage = 'it') {
+        if (!exercise || !exercise.videos) return null;
+        
+        // Priority: preferred language (Italian by default)
+        if (preferredLanguage === 'it' && exercise.videos.it && this.isValidYouTubeUrl(exercise.videos.it)) {
+            return {
+                url: exercise.videos.it,
+                language: 'it',
+                label: '🇮🇹 Video in italiano'
+            };
+        }
+        
+        // Fallback: English
+        if (exercise.videos.en && this.isValidYouTubeUrl(exercise.videos.en)) {
+            return {
+                url: exercise.videos.en,
+                language: 'en',
+                label: '🇬🇧 Video in English'
+            };
+        }
+        
+        // Fallback: any available video
+        const availableLang = Object.keys(exercise.videos)[0];
+        if (availableLang && this.isValidYouTubeUrl(exercise.videos[availableLang])) {
+            return {
+                url: exercise.videos[availableLang],
+                language: availableLang,
+                label: `📹 Video (${availableLang.toUpperCase()})`
+            };
+        }
+        
+        return null;
+    },
+    
+    // Generate HTML for video embed
+    renderVideoEmbed(exercise, preferredLanguage = 'it') {
+        const video = this.getVideoUrl(exercise, preferredLanguage);
+        
+        if (!video) {
+            return `
+                <div class="no-video">
+                    <p>📹 Video tutorial non ancora disponibile</p>
+                </div>
+            `;
+        }
+        
+        // Escape HTML to prevent XSS (extra safety layer)
+        const escapedUrl = video.url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedLabel = video.label.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const escapedName = exercise.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
+        return `
+            <div class="exercise-video">
+                <h4>📹 Video Tutorial</h4>
+                <div class="video-container">
+                    <iframe 
+                        src="${escapedUrl}" 
+                        style="border: none;" 
+                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" 
+                        sandbox="allow-scripts allow-presentation"
+                        allowfullscreen
+                        loading="lazy"
+                        title="Video tutorial ${escapedName}">
+                    </iframe>
+                </div>
+                <p class="video-language">${escapedLabel}</p>
+            </div>
+        `;
     }
 };
