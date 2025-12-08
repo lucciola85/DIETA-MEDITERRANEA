@@ -571,7 +571,7 @@ const App = {
 
         // Update meal target info
         document.getElementById('mealTypeName').textContent = Nutrition.getMealTypeName(mealType);
-        document.getElementById('targetCalories').textContent = mealMacros.calories;
+        document.getElementById('mealTargetCalories').textContent = mealMacros.calories;
         document.getElementById('targetCarbs').textContent = mealMacros.carbs;
         document.getElementById('targetProtein').textContent = mealMacros.protein;
         document.getElementById('targetFats').textContent = mealMacros.fats;
