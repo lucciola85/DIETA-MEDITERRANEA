@@ -8,6 +8,8 @@
     <title>Dieta Mediterranea & Allenamento</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- Profile Selection Screen -->
@@ -225,12 +227,19 @@
             <!-- Workout Page -->
             <div id="workoutPage" class="page">
                 <div class="page-header">
-                    <h1>Scheda Allenamento</h1>
-                    <select id="workoutLevel" class="workout-level-select">
-                        <option value="beginner">Principiante</option>
-                        <option value="intermediate">Intermedio</option>
-                        <option value="advanced">Avanzato</option>
-                    </select>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <h1 style="margin: 0;">Scheda Allenamento</h1>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <select id="workoutLevel" class="workout-level-select">
+                                <option value="beginner">Principiante</option>
+                                <option value="intermediate">Intermedio</option>
+                                <option value="advanced">Avanzato</option>
+                            </select>
+                            <button id="exportWorkoutPdfBtn" class="btn btn-primary" style="white-space: nowrap;">
+                                📄 Esporta PDF
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div id="workoutSchedule" class="workout-schedule"></div>
             </div>
