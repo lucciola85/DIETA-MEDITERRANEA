@@ -404,8 +404,10 @@ const PDFExport = {
 
             // Exercises for this day
             for (const ex of day.exercises) {
-                // Note: We need access to Workout.getExercise() here
-                // This assumes Workout module is available globally
+                // Get exercise details - Workout module must be loaded before this function is called
+                if (!window.Workout) {
+                    throw new Error('Workout module not loaded');
+                }
                 const exercise = window.Workout.getExercise(ex.exercise);
                 
                 checkPageBreak(25);
@@ -447,12 +449,13 @@ const PDFExport = {
                     doc.setFontSize(9);
                     doc.setTextColor(80, 80, 80);
                     
-                    // Clean HTML tags and format the detailed description
-                    const cleanText = exercise.detailedDescription
+                    // First clean with cleanTextForPDF, then remove HTML tags
+                    let cleanedDesc = this.cleanTextForPDF(exercise.detailedDescription);
+                    
+                    // Remove HTML tags and format for PDF
+                    const cleanText = cleanedDesc
                         .replace(/<strong>/g, '')
                         .replace(/<\/strong>/g, ': ')
-                        .replace(/•/g, '  -')
-                        .replace(/✗/g, '  X')
                         .replace(/<[^>]*>/g, '\n')
                         .split('\n')
                         .filter(line => line.trim().length > 0);
