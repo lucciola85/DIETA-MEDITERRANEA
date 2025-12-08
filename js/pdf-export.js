@@ -46,7 +46,7 @@ const PDFExport = {
 
         // Categories and items
         Object.keys(shoppingListData.items).forEach(categoryKey => {
-            const categoryName = this.getCategoryName(categoryKey);
+            const categoryName = FoodDatabase.getCategoryName(categoryKey);
             const items = shoppingListData.items[categoryKey];
 
             // Category header
@@ -258,30 +258,6 @@ const PDFExport = {
         // Save PDF
         const fileName = `Menu_Settimanale_${profile.name}_${this.formatDateForFilename(new Date())}.pdf`;
         doc.save(fileName);
-    },
-
-    /**
-     * Get category name in Italian
-     * @param {string} categoryKey - Category key
-     * @returns {string} Category name
-     */
-    getCategoryName(categoryKey) {
-        const categories = {
-            vegetables: 'VERDURE',
-            fruits: 'FRUTTA',
-            cereals: 'CEREALI E DERIVATI',
-            legumes: 'LEGUMI',
-            fish: 'PESCE',
-            seafood: 'FRUTTI DI MARE',
-            poultry: 'POLLAME',
-            meat: 'CARNE',
-            eggs: 'UOVA',
-            dairy: 'LATTICINI',
-            nuts: 'FRUTTA SECCA E SEMI',
-            oils: 'OLI E GRASSI',
-            other: 'ALTRO'
-        };
-        return categories[categoryKey] || categoryKey.toUpperCase();
     },
 
     /**
