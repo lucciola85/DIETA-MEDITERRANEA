@@ -194,13 +194,16 @@ const Nutrition = {
     },
 
     // AUTOMATIC PORTION CALCULATION
-    // Given a list of foods, calculate optimal portions to match target macros
+    // Given a list of foods (max 5), calculate optimal portions to match target macros
     calculateOptimalPortions(foods, targetMacros) {
-        // This is a simplified algorithm that proportionally distributes
-        // the target macros across the selected foods based on their macro profiles
-        
-        if (foods.length === 0) {
+        // Validate input
+        if (!foods || foods.length === 0) {
             return [];
+        }
+        
+        if (foods.length > 5) {
+            console.warn('Maximum 5 ingredients allowed. Using first 5.');
+            foods = foods.slice(0, 5);
         }
 
         // Start with equal calories distribution
@@ -215,8 +218,8 @@ const Nutrition = {
             // Round to reasonable portions (5g increments)
             grams = Math.round(grams / 5) * 5;
             
-            // Minimum 5g, maximum 500g per food item
-            grams = Math.max(5, Math.min(500, grams));
+            // Apply constraints: minimum 10g, maximum 500g per food item
+            grams = Math.max(10, Math.min(500, grams));
             
             return {
                 food: food,
@@ -226,8 +229,16 @@ const Nutrition = {
         });
 
         // Refine portions to better match macros (iterative adjustment)
-        const maxIterations = 10;
-        for (let i = 0; i < maxIterations; i++) {
+        // This optimization tries to match calories first, then balance macros
+        // 20 iterations provide good balance between accuracy and performance
+        const MAX_ITERATIONS = 20;
+        const PROTEIN_RICH_THRESHOLD = 10; // g per 100g
+        const CARB_RICH_THRESHOLD = 15; // g per 100g
+        const FAT_RICH_THRESHOLD = 5; // g per 100g
+        const MACRO_ADJUSTMENT_INCREASE = 1.05;
+        const MACRO_ADJUSTMENT_DECREASE = 0.95;
+        
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
             const currentTotal = portions.reduce((sum, p) => ({
                 calories: sum.calories + p.nutrition.calories,
                 protein: sum.protein + p.nutrition.protein,
@@ -235,20 +246,172 @@ const Nutrition = {
                 fats: sum.fats + p.nutrition.fats
             }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
-            // Check if we're close enough
-            const calorieDiff = Math.abs(currentTotal.calories - targetMacros.calories);
-            if (calorieDiff < 50) break; // Within 50 kcal is acceptable
+            // Calculate differences from target
+            const calorieDiff = currentTotal.calories - targetMacros.calories;
+            const proteinDiff = currentTotal.protein - targetMacros.protein;
+            const carbsDiff = currentTotal.carbs - targetMacros.carbs;
+            const fatsDiff = currentTotal.fats - targetMacros.fats;
 
-            // Adjust portions proportionally
-            const adjustmentFactor = targetMacros.calories / currentTotal.calories;
+            // Check if we're close enough (within 3% for calories)
+            if (Math.abs(calorieDiff) < targetMacros.calories * 0.03) {
+                break;
+            }
+
+            // Adjust portions based on which foods can help balance macros
+            // Foods with higher protein density should be adjusted when protein is low
+            // Foods with higher carb density should be adjusted when carbs are low, etc.
+            
             portions.forEach(portion => {
-                portion.grams = Math.round((portion.grams * adjustmentFactor) / 5) * 5;
-                portion.grams = Math.max(5, Math.min(500, portion.grams));
+                let adjustment = 1.0;
+                
+                // Primary goal: match calories
+                const calorieAdjustment = targetMacros.calories / currentTotal.calories;
+                adjustment *= calorieAdjustment;
+                
+                // Secondary goal: balance macros based on food's macro profile
+                // If we need more protein and this food is protein-rich, increase it slightly
+                if (proteinDiff < 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (proteinDiff > 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                }
+                
+                // If we need more carbs and this food is carb-rich, increase it
+                if (carbsDiff < 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (carbsDiff > 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                }
+                
+                // If we need more fats and this food is fat-rich, increase it
+                if (fatsDiff < 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (fatsDiff > 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
+                }
+                
+                // Apply adjustment
+                let newGrams = portion.grams * adjustment;
+                newGrams = Math.round(newGrams / 5) * 5;
+                newGrams = Math.max(10, Math.min(500, newGrams));
+                
+                portion.grams = newGrams;
                 portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
             });
         }
 
         return portions;
+    },
+
+    // Calculate macro adherence levels (for visual feedback)
+    // Returns: 'excellent' (<5% deviation), 'good' (5-15%), 'poor' (>15%)
+    getMacroAdherence(current, target) {
+        if (target === 0) return 'excellent';
+        
+        const deviation = Math.abs((current - target) / target) * 100;
+        
+        if (deviation < 5) return 'excellent';
+        if (deviation < 15) return 'good';
+        return 'poor';
+    },
+
+    // Calculate complete meal analysis with adherence feedback
+    analyzeMealComposition(portions, targetMacros) {
+        if (!portions || portions.length === 0) {
+            return {
+                totalNutrition: { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 },
+                adherence: {
+                    calories: { level: 'poor', deviation: 100, icon: '❌' },
+                    protein: { level: 'poor', deviation: 100, icon: '❌' },
+                    carbs: { level: 'poor', deviation: 100, icon: '❌' },
+                    fats: { level: 'poor', deviation: 100, icon: '❌' }
+                },
+                suggestions: ['Aggiungi almeno un alimento per iniziare']
+            };
+        }
+
+        // Calculate totals
+        const totalNutrition = portions.reduce((sum, p) => ({
+            calories: sum.calories + p.nutrition.calories,
+            protein: sum.protein + p.nutrition.protein,
+            carbs: sum.carbs + p.nutrition.carbs,
+            fats: sum.fats + p.nutrition.fats,
+            fiber: sum.fiber + p.nutrition.fiber
+        }), { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 });
+
+        // Calculate adherence for each macro
+        const adherence = {
+            calories: {
+                level: this.getMacroAdherence(totalNutrition.calories, targetMacros.calories),
+                deviation: targetMacros.calories > 0 ? 
+                    Math.abs((totalNutrition.calories - targetMacros.calories) / targetMacros.calories * 100) : 0,
+                icon: ''
+            },
+            protein: {
+                level: this.getMacroAdherence(totalNutrition.protein, targetMacros.protein),
+                deviation: targetMacros.protein > 0 ? 
+                    Math.abs((totalNutrition.protein - targetMacros.protein) / targetMacros.protein * 100) : 0,
+                icon: ''
+            },
+            carbs: {
+                level: this.getMacroAdherence(totalNutrition.carbs, targetMacros.carbs),
+                deviation: targetMacros.carbs > 0 ? 
+                    Math.abs((totalNutrition.carbs - targetMacros.carbs) / targetMacros.carbs * 100) : 0,
+                icon: ''
+            },
+            fats: {
+                level: this.getMacroAdherence(totalNutrition.fats, targetMacros.fats),
+                deviation: targetMacros.fats > 0 ? 
+                    Math.abs((totalNutrition.fats - targetMacros.fats) / targetMacros.fats * 100) : 0,
+                icon: ''
+            }
+        };
+
+        // Add icons based on adherence level
+        Object.keys(adherence).forEach(macro => {
+            if (adherence[macro].level === 'excellent') {
+                adherence[macro].icon = '✅';
+            } else if (adherence[macro].level === 'good') {
+                adherence[macro].icon = '⚠️';
+            } else {
+                adherence[macro].icon = '❌';
+            }
+        });
+
+        // Generate suggestions
+        const suggestions = [];
+        
+        // Check if any food category is missing (using same thresholds as optimization)
+        const hasProteinSource = portions.some(p => p.food.protein > PROTEIN_RICH_THRESHOLD);
+        const hasCarbSource = portions.some(p => p.food.carbs > CARB_RICH_THRESHOLD);
+        const hasFatSource = portions.some(p => p.food.fats > FAT_RICH_THRESHOLD);
+        
+        if (!hasProteinSource && adherence.protein.level !== 'excellent') {
+            suggestions.push('💡 Aggiungi una fonte proteica (pesce, carne, legumi, uova)');
+        }
+        
+        if (!hasCarbSource && adherence.carbs.level !== 'excellent') {
+            suggestions.push('💡 Aggiungi una fonte di carboidrati (cereali, frutta, patate)');
+        }
+        
+        if (!hasFatSource && adherence.fats.level !== 'excellent') {
+            suggestions.push('💡 Aggiungi una fonte di grassi sani (olio d\'oliva, frutta secca)');
+        }
+        
+        // Check overall balance
+        if (adherence.calories.level === 'poor') {
+            if (totalNutrition.calories < targetMacros.calories * 0.85) {
+                suggestions.push('⚠️ Calorie troppo basse - aumenta le porzioni');
+            } else {
+                suggestions.push('⚠️ Calorie troppo alte - riduci le porzioni');
+            }
+        }
+
+        return {
+            totalNutrition,
+            adherence,
+            suggestions
+        };
     },
 
     // Get meal type name in Italian
