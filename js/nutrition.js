@@ -206,7 +206,10 @@ const Nutrition = {
     // 50-200g: round to 10g  
     // Over 200g: round to 25g
     roundToPracticalGrams(grams) {
-        // Round to practical intervals: 5g (small), 10g (medium), 25g (large)
+        // Round to practical intervals based on portion size:
+        // < 50g: round to 5g intervals (e.g., 10g, 15g, 20g)
+        // 50-200g: round to 10g intervals (e.g., 60g, 70g, 80g)
+        // > 200g: round to 25g intervals (e.g., 225g, 250g, 275g)
         if (grams < 50) {
             return Math.round(grams / this.PORTION_ROUND_INTERVAL) * this.PORTION_ROUND_INTERVAL;
         } else if (grams < 200) {
