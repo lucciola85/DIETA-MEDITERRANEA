@@ -1251,13 +1251,23 @@ body {
     }
 }
 
+/* Shopping Actions */
+.shopping-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 /* Print Styles */
 @media print {
     .sidebar,
     .page-header button,
     .nav-footer,
     .btn,
-    .modal {
+    .modal,
+    .shopping-actions {
         display: none !important;
     }
 
@@ -1267,5 +1277,57 @@ body {
 
     .page {
         display: block !important;
+    }
+
+    /* Shopping list specific print styles */
+    body.printing-shopping-list .page:not(#shoppingPage) {
+        display: none !important;
+    }
+
+    body.printing-shopping-list #shoppingPage {
+        display: block !important;
+    }
+
+    .shopping-list {
+        width: 100%;
+    }
+
+    .shopping-category {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+
+    .shopping-category h3 {
+        color: #000;
+        border-bottom: 2px solid #000;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+
+    .shopping-item {
+        padding: 5px 0;
+        border-bottom: 1px dotted #ccc;
+    }
+
+    .shopping-item input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        border: 1px solid #000;
+        margin-right: 10px;
+    }
+
+    .shopping-item label {
+        font-size: 12pt;
+        color: #000;
+    }
+
+    /* Add header to print */
+    #shoppingPage::before {
+        content: "Lista della Spesa";
+        display: block;
+        font-size: 24pt;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
     }
 }

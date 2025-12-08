@@ -172,7 +172,10 @@
                     <button id="generateShoppingList" class="btn btn-primary">Genera Lista Settimanale</button>
                 </div>
                 <div id="shoppingList" class="shopping-list"></div>
-                <button id="exportShoppingList" class="btn btn-secondary" style="display:none;">📄 Esporta Lista</button>
+                <div class="shopping-actions" style="display:none;">
+                    <button id="exportShoppingList" class="btn btn-secondary">📄 Esporta TXT</button>
+                    <button id="printShoppingList" class="btn btn-secondary">🖨️ Salva/Stampa PDF</button>
+                </div>
             </div>
 
             <!-- Weight Tracking Page -->
@@ -284,7 +287,7 @@
                             <h3 id="mealTypeName">Pasto</h3>
                             <div class="target-macros">
                                 <div>Target: <strong id="targetCalories">--</strong> kcal</div>
-                                <div>C: <span id="targetCarbs">--</span>g | P: <span id="targetProtein">--</span>g | G: <span id="targetFats">--</span>g</div>
+                                <div>Carboidrati: <span id="targetCarbs">--</span>g | Proteine: <span id="targetProtein">--</span>g | Grassi: <span id="targetFats">--</span>g</div>
                             </div>
                         </div>
 

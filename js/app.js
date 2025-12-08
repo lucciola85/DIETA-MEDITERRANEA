@@ -124,6 +124,10 @@ const App = {
             this.exportShoppingList();
         });
 
+        document.getElementById('printShoppingList')?.addEventListener('click', () => {
+            this.printShoppingList();
+        });
+
         // Backup
         document.getElementById('exportDataBtn')?.addEventListener('click', () => {
             this.exportData();
@@ -382,9 +386,9 @@ const App = {
                                     <span style="font-weight: bold; color: var(--primary);">${meal.totalNutrition.calories} kcal</span>
                                 </div>
                                 <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.75rem;">
-                                    P: ${meal.totalNutrition.protein}g | 
-                                    C: ${meal.totalNutrition.carbs}g | 
-                                    G: ${meal.totalNutrition.fats}g |
+                                    Proteine: ${meal.totalNutrition.protein}g | 
+                                    Carboidrati: ${meal.totalNutrition.carbs}g | 
+                                    Grassi: ${meal.totalNutrition.fats}g |
                                     Fibre: ${meal.totalNutrition.fiber}g
                                 </div>
                                 <div style="border-top: 1px solid #f0f0f0; padding-top: 0.75rem;">
@@ -473,25 +477,58 @@ const App = {
                         <div style="margin-top: 1rem; padding: 1rem; background: var(--cream); border-radius: 6px;">
                             <strong>Totale:</strong> 
                             ${meal.totalNutrition.calories} kcal | 
-                            P: ${meal.totalNutrition.protein}g | 
-                            C: ${meal.totalNutrition.carbs}g | 
-                            G: ${meal.totalNutrition.fats}g
+                            Proteine: ${meal.totalNutrition.protein}g | 
+                            Carboidrati: ${meal.totalNutrition.carbs}g | 
+                            Grassi: ${meal.totalNutrition.fats}g
                         </div>
                     ` : ''}
-                    <button class="btn btn-primary meal-add-btn" data-meal-type="${key}">
-                        ${meal ? '✏️ Modifica Pasto' : '+ Aggiungi Alimenti'}
-                    </button>
+                    <div style="display: flex; gap: 10px; margin-top: 0.5rem;">
+                        <button class="btn btn-primary meal-add-btn" data-meal-type="${key}" style="flex: 1;">
+                            ${meal ? '✏️ Modifica Pasto' : '+ Aggiungi Alimenti'}
+                        </button>
+                        ${meal ? `
+                            <button class="btn btn-danger meal-delete-btn" data-meal-id="${meal.id}" data-meal-type="${key}" style="background: #dc3545; color: white;">
+                                🗑️ Elimina
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             `;
         }));
 
         container.innerHTML = mealsHTML.join('');
 
-        // Add click handlers to add buttons
+        // Add click handlers to add/modify buttons
         container.querySelectorAll('.meal-add-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const mealType = btn.dataset.mealType;
                 this.showFoodSelector(mealType);
+            });
+        });
+
+        // Add click handlers to delete buttons
+        container.querySelectorAll('.meal-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const mealId = btn.dataset.mealId;
+                const mealType = btn.dataset.mealType;
+                const mealName = {
+                    breakfast: 'Colazione',
+                    morningSnack: 'Spuntino Mattina',
+                    lunch: 'Pranzo',
+                    afternoonSnack: 'Merenda',
+                    dinner: 'Cena'
+                }[mealType];
+                
+                if (confirm(`Sei sicuro di voler eliminare ${mealName}? Questa azione non può essere annullata.`)) {
+                    const success = await Meals.deleteMeal(mealId);
+                    if (success) {
+                        this.showToast('Pasto eliminato con successo', 'success');
+                        await this.renderMealsForDate(this.selectedDate);
+                        await this.renderDashboard();
+                    } else {
+                        this.showToast('Errore nell\'eliminazione del pasto', 'error');
+                    }
+                }
             });
         });
     },
@@ -505,9 +542,9 @@ const App = {
                     <div class="meal-item-macros">
                         <strong>${item.grams}g</strong> - 
                         ${item.nutrition.calories} kcal | 
-                        P: ${item.nutrition.protein}g | 
-                        C: ${item.nutrition.carbs}g | 
-                        G: ${item.nutrition.fats}g
+                        Proteine: ${item.nutrition.protein}g | 
+                        Carboidrati: ${item.nutrition.carbs}g | 
+                        Grassi: ${item.nutrition.fats}g
                     </div>
                 </div>
             </div>
@@ -635,7 +672,7 @@ const App = {
                         <button class="remove-food-btn" data-index="${index}">×</button>
                     </div>
                     <div class="selected-food-info">
-                        Per 100g: ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g
+                        Per 100g: ${food.calories} kcal | Proteine: ${food.protein}g | Carboidrati: ${food.carbs}g | Grassi: ${food.fats}g
                     </div>
                     ${portion ? `
                         <div class="selected-food-portion">
@@ -643,9 +680,9 @@ const App = {
                                    min="10" max="500" step="5" data-index="${index}">
                             <span>g →</span>
                             <span>${portion.nutrition.calories} kcal | 
-                                  P: ${portion.nutrition.protein}g | 
-                                  C: ${portion.nutrition.carbs}g | 
-                                  G: ${portion.nutrition.fats}g</span>
+                                  Proteine: ${portion.nutrition.protein}g | 
+                                  Carboidrati: ${portion.nutrition.carbs}g | 
+                                  Grassi: ${portion.nutrition.fats}g</span>
                         </div>
                     ` : ''}
                 </div>
@@ -873,7 +910,7 @@ const App = {
                     <div class="food-item-name">${food.name}</div>
                     <div class="food-item-category">${FoodDatabase.getCategoryName(food.category)}</div>
                     <div class="food-item-macros">
-                        ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g (per 100g)
+                        ${food.calories} kcal | Proteine: ${food.protein}g | Carboidrati: ${food.carbs}g | Grassi: ${food.fats}g (per 100g)
                     </div>
                 </div>
             `;
@@ -950,9 +987,11 @@ const App = {
     // Render shopping list
     renderShoppingList(shoppingList) {
         const container = document.getElementById('shoppingList');
+        const actionsContainer = document.querySelector('.shopping-actions');
 
         if (Object.keys(shoppingList).length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #999;">Nessun alimento nella lista</p>';
+            if (actionsContainer) actionsContainer.style.display = 'none';
             return;
         }
 
@@ -979,6 +1018,9 @@ const App = {
 
         container.innerHTML = html;
 
+        // Show action buttons
+        if (actionsContainer) actionsContainer.style.display = 'flex';
+
         // Add checkbox handlers
         container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
@@ -1003,6 +1045,27 @@ const App = {
         a.click();
         
         this.showToast('Lista esportata', 'success');
+    },
+
+    // Print shopping list to PDF
+    printShoppingList() {
+        const shoppingContainer = document.getElementById('shoppingList');
+        
+        if (!shoppingContainer || shoppingContainer.innerHTML.trim() === '') {
+            this.showToast('Genera prima la lista della spesa', 'error');
+            return;
+        }
+
+        // Add print class to body for print-specific styling
+        document.body.classList.add('printing-shopping-list');
+        
+        // Print
+        window.print();
+        
+        // Remove print class after printing
+        setTimeout(() => {
+            document.body.classList.remove('printing-shopping-list');
+        }, 100);
     },
 
     // Render weight page
@@ -1127,6 +1190,11 @@ const App = {
                                                     📖 Vedi spiegazione dettagliata
                                                 </button>
                                                 <div class="exercise-detailed-description" id="details-${ex.exercise}" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-left: 3px solid var(--primary); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                                    ${exercise.imageUrl ? `
+                                                        <div style="text-align: center; margin-bottom: 1rem;">
+                                                            <img src="${exercise.imageUrl}" alt="${exercise.name}" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
+                                                        </div>
+                                                    ` : ''}
                                                     ${exercise.detailedDescription}
                                                 </div>
                                             ` : ''}
