@@ -1796,10 +1796,9 @@ const ExerciseVideos = {
     isValidYouTubeUrl(url) {
         if (!url || typeof url !== 'string') return false;
         
-        // Only allow YouTube embed URLs
+        // Only allow YouTube embed URLs with optional query parameters
         const validPatterns = [
-            /^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]+$/,
-            /^https:\/\/youtube\.com\/embed\/[a-zA-Z0-9_-]+$/
+            /^https:\/\/(www\.)?youtube\.com\/embed\/[a-zA-Z0-9_-]+(\?.*)?$/
         ];
         
         return validPatterns.some(pattern => pattern.test(url));
@@ -1852,20 +1851,26 @@ const ExerciseVideos = {
             `;
         }
         
+        // Escape HTML to prevent XSS (extra safety layer)
+        const escapedUrl = video.url.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedLabel = video.label.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const escapedName = exercise.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
         return `
             <div class="exercise-video">
                 <h4>📹 Video Tutorial</h4>
                 <div class="video-container">
                     <iframe 
-                        src="${video.url}" 
+                        src="${escapedUrl}" 
                         style="border: none;" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        sandbox="allow-scripts allow-same-origin allow-presentation"
                         allowfullscreen
                         loading="lazy"
-                        title="Video tutorial ${exercise.name}">
+                        title="Video tutorial ${escapedName}">
                     </iframe>
                 </div>
-                <p class="video-language">${video.label}</p>
+                <p class="video-language">${escapedLabel}</p>
             </div>
         `;
     }
