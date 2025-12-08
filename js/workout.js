@@ -901,7 +901,7 @@ const Workout = {
 
 <strong>ESECUZIONE:</strong>
 1. FASE ECCENTRICA (2-3 secondi): Scendi verso il pavimento
-   - Piegagomiti all'indietro (45° rispetto al corpo)
+   - Piega gomiti all'indietro (45° rispetto al corpo)
    - Scendi fino a petto vicino al pavimento
    - Mantieni corpo in linea retta
    - Gomiti non si aprono eccessivamente
