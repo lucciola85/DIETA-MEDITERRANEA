@@ -720,9 +720,9 @@ const App = {
                 const index = parseInt(input.dataset.index, 10);
                 const newGrams = parseInt(input.value, 10);
                 
-                // Validate portion range (10-500g)
-                if (isNaN(newGrams) || newGrams < 10 || newGrams > 500) {
-                    this.showToast('Grammatura deve essere tra 10g e 500g', 'error');
+                // Validate portion range using constants from Nutrition module
+                if (isNaN(newGrams) || newGrams < Nutrition.MIN_PORTION_GRAMS || newGrams > Nutrition.MAX_PORTION_GRAMS) {
+                    this.showToast(`Grammatura deve essere tra ${Nutrition.MIN_PORTION_GRAMS}g e ${Nutrition.MAX_PORTION_GRAMS}g`, 'error');
                     input.value = this.calculatedPortions[index].grams; // Reset to previous value
                     return;
                 }

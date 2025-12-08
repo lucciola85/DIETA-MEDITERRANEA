@@ -8,6 +8,13 @@ const Nutrition = {
     CARB_RICH_THRESHOLD: 15,
     FAT_RICH_THRESHOLD: 5,
     
+    // Portion calculation constraints
+    MIN_CALORIES_PER_100G: 10,  // Minimum calorie density to prevent division issues
+    MIN_PORTION_GRAMS: 10,      // Minimum portion size
+    MAX_PORTION_GRAMS: 500,     // Maximum portion size
+    PORTION_ROUND_INTERVAL: 5,  // Round portions to nearest 5g
+    TOLERANCE_PERCENTAGE: 0.03, // 3% tolerance for target matching
+    
     // Macro adjustment factors for optimization
     MACRO_ADJUSTMENT_INCREASE: 1.05,
     MACRO_ADJUSTMENT_DECREASE: 0.95,
@@ -199,12 +206,13 @@ const Nutrition = {
     // 50-200g: round to 10g  
     // Over 200g: round to 25g
     roundToPracticalGrams(grams) {
+        // Round to practical portions for easier measurement
         if (grams < 50) {
-            return Math.round(grams / 5) * 5;
+            return Math.round(grams / this.PORTION_ROUND_INTERVAL) * this.PORTION_ROUND_INTERVAL;
         } else if (grams < 200) {
-            return Math.round(grams / 10) * 10;
+            return Math.round(grams / 10) * 10;  // Round to 10g for medium portions
         } else {
-            return Math.round(grams / 25) * 25;
+            return Math.round(grams / 25) * 25;  // Round to 25g for large portions
         }
     },
 
@@ -245,12 +253,11 @@ const Nutrition = {
             return [];
         }
         
-        // Filter foods with invalid data or very low calories (minimum 10 kcal/100g to prevent division issues)
-        const MIN_CALORIES = 10;
+        // Filter foods with invalid data or very low calories to prevent division issues
         const validFoods = foods.filter(food => 
             food && 
             typeof food.calories === 'number' && 
-            food.calories >= MIN_CALORIES
+            food.calories >= this.MIN_CALORIES_PER_100G
         );
         
         if (validFoods.length === 0) {
@@ -267,15 +274,18 @@ const Nutrition = {
 
         const targetCalories = targetMacros.calories;
         
-        // STEP 1: Calculate inverse calorie density weights
+        // STEP 1: Calculate inverse calorie density weights with safe division
         // Foods with higher calorie density get SMALLER portions
         // Foods with lower calorie density get LARGER portions
-        const totalInverseWeight = foods.reduce((sum, food) => sum + (1 / food.calories), 0);
+        const totalInverseWeight = foods.reduce((sum, food) => {
+            // Use Math.max to ensure safe division even if food.calories approaches MIN_CALORIES_PER_100G
+            return sum + (1 / Math.max(food.calories, this.MIN_CALORIES_PER_100G));
+        }, 0);
         
         // STEP 2: Distribute calories inversely to calorie density
         const portions = foods.map(food => {
-            // Inverse weight: less caloric foods have higher weight
-            const inverseWeight = 1 / food.calories;
+            // Inverse weight: less caloric foods have higher weight (safe division)
+            const inverseWeight = 1 / Math.max(food.calories, this.MIN_CALORIES_PER_100G);
             
             // Calculate calorie share for this food (proportional to inverse weight)
             const calorieShare = (inverseWeight / totalInverseWeight) * targetCalories;
@@ -288,8 +298,8 @@ const Nutrition = {
             // Round to practical portions
             grams = this.roundToPracticalGrams(grams);
             
-            // Apply constraints: minimum 10g, maximum 500g per food item
-            grams = Math.max(10, Math.min(500, grams));
+            // Apply constraints using module-level constants
+            grams = Math.max(this.MIN_PORTION_GRAMS, Math.min(this.MAX_PORTION_GRAMS, grams));
             
             return {
                 food: food,
@@ -306,8 +316,8 @@ const Nutrition = {
             const scaleFactor = targetCalories / totalCalories;
             
             portions.forEach(portion => {
-                // Scale down the grams
-                portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * scaleFactor));
+                // Scale down the grams using module-level constants
+                portion.grams = Math.max(this.MIN_PORTION_GRAMS, this.roundToPracticalGrams(portion.grams * scaleFactor));
                 portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
             });
             
@@ -332,8 +342,8 @@ const Nutrition = {
             const carbsDiff = currentTotal.carbs - targetMacros.carbs;
             const fatsDiff = currentTotal.fats - targetMacros.fats;
 
-            // Check if we're close enough (within 3% for calories - maintains precision)
-            if (Math.abs(calorieDiff) < targetMacros.calories * 0.03) {
+            // Check if we're close enough using module-level tolerance
+            if (Math.abs(calorieDiff) < targetMacros.calories * this.TOLERANCE_PERCENTAGE) {
                 break;
             }
 
@@ -341,7 +351,7 @@ const Nutrition = {
             if (calorieDiff > 0) {
                 const scaleFactor = targetMacros.calories / currentTotal.calories;
                 portions.forEach(portion => {
-                    portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * scaleFactor));
+                    portion.grams = Math.max(this.MIN_PORTION_GRAMS, this.roundToPracticalGrams(portion.grams * scaleFactor));
                     portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
                 });
                 continue;
@@ -384,7 +394,7 @@ const Nutrition = {
                 if (adjustmentCount > 0) {
                     let newGrams = portion.grams * adjustment;
                     newGrams = this.roundToPracticalGrams(newGrams);
-                    newGrams = Math.max(10, Math.min(500, newGrams));
+                    newGrams = Math.max(this.MIN_PORTION_GRAMS, Math.min(this.MAX_PORTION_GRAMS, newGrams));
                     
                     portion.grams = newGrams;
                     portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
@@ -397,7 +407,7 @@ const Nutrition = {
         if (totalCalories > targetCalories) {
             const finalScaleFactor = targetCalories / totalCalories;
             portions.forEach(portion => {
-                portion.grams = Math.max(10, this.roundToPracticalGrams(portion.grams * finalScaleFactor));
+                portion.grams = Math.max(this.MIN_PORTION_GRAMS, this.roundToPracticalGrams(portion.grams * finalScaleFactor));
                 portion.nutrition = this.calculateFoodNutrition(portion.food, portion.grams);
             });
         }
