@@ -175,17 +175,22 @@ const Nutrition = {
         };
     },
 
+    // Helper function to round up to 1 decimal place
+    roundUpToOneDecimal(value) {
+        return Math.ceil(value * 10) / 10;
+    },
+
     // Calculate nutrition for food items
     calculateFoodNutrition(food, grams) {
         // All values in database are per 100g
         const factor = grams / 100;
 
         return {
-            calories: Math.round(food.calories * factor),
-            protein: parseFloat((food.protein * factor).toFixed(1)),
-            carbs: parseFloat((food.carbs * factor).toFixed(1)),
-            fats: parseFloat((food.fats * factor).toFixed(1)),
-            fiber: parseFloat((food.fiber * factor).toFixed(1))
+            calories: Math.ceil(food.calories * factor), // Calories always rounded up to integer
+            protein: this.roundUpToOneDecimal(food.protein * factor),
+            carbs: this.roundUpToOneDecimal(food.carbs * factor),
+            fats: this.roundUpToOneDecimal(food.fats * factor),
+            fiber: this.roundUpToOneDecimal(food.fiber * factor)
         };
     },
 
@@ -205,7 +210,7 @@ const Nutrition = {
 
     // Calculate total nutrition for a meal
     calculateMealNutrition(foodItems) {
-        return foodItems.reduce((total, item) => {
+        const total = foodItems.reduce((total, item) => {
             const nutrition = this.calculateFoodNutrition(item.food, item.grams);
             return {
                 calories: total.calories + nutrition.calories,
@@ -215,6 +220,15 @@ const Nutrition = {
                 fiber: total.fiber + nutrition.fiber
             };
         }, { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 });
+        
+        // Round up all totals to 1 decimal
+        return {
+            calories: Math.ceil(total.calories),
+            protein: this.roundUpToOneDecimal(total.protein),
+            carbs: this.roundUpToOneDecimal(total.carbs),
+            fats: this.roundUpToOneDecimal(total.fats),
+            fiber: this.roundUpToOneDecimal(total.fiber)
+        };
     },
 
     // AUTOMATIC PORTION CALCULATION
@@ -377,6 +391,13 @@ const Nutrition = {
             fats: sum.fats + p.nutrition.fats,
             fiber: sum.fiber + p.nutrition.fiber
         }), { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 });
+        
+        // Round up all totals to 1 decimal
+        totalNutrition.calories = Math.ceil(totalNutrition.calories);
+        totalNutrition.protein = this.roundUpToOneDecimal(totalNutrition.protein);
+        totalNutrition.carbs = this.roundUpToOneDecimal(totalNutrition.carbs);
+        totalNutrition.fats = this.roundUpToOneDecimal(totalNutrition.fats);
+        totalNutrition.fiber = this.roundUpToOneDecimal(totalNutrition.fiber);
 
         // Calculate adherence for each macro
         const adherence = {

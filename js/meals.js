@@ -173,7 +173,7 @@ const Meals = {
             }
             shoppingList[item.category].push({
                 name: item.name,
-                grams: Math.ceil(item.grams) // Round up
+                grams: Nutrition.roundUpToOneDecimal(item.grams) // Round up to 1 decimal
             });
         });
 

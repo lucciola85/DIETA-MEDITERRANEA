@@ -382,9 +382,9 @@ const App = {
                                     <span style="font-weight: bold; color: var(--primary);">${meal.totalNutrition.calories} kcal</span>
                                 </div>
                                 <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.75rem;">
-                                    P: ${meal.totalNutrition.protein}g | 
-                                    C: ${meal.totalNutrition.carbs}g | 
-                                    G: ${meal.totalNutrition.fats}g |
+                                    Proteine: ${meal.totalNutrition.protein}g | 
+                                    Carboidrati: ${meal.totalNutrition.carbs}g | 
+                                    Grassi: ${meal.totalNutrition.fats}g |
                                     Fibre: ${meal.totalNutrition.fiber}g
                                 </div>
                                 <div style="border-top: 1px solid #f0f0f0; padding-top: 0.75rem;">
@@ -473,9 +473,9 @@ const App = {
                         <div style="margin-top: 1rem; padding: 1rem; background: var(--cream); border-radius: 6px;">
                             <strong>Totale:</strong> 
                             ${meal.totalNutrition.calories} kcal | 
-                            P: ${meal.totalNutrition.protein}g | 
-                            C: ${meal.totalNutrition.carbs}g | 
-                            G: ${meal.totalNutrition.fats}g
+                            Proteine: ${meal.totalNutrition.protein}g | 
+                            Carboidrati: ${meal.totalNutrition.carbs}g | 
+                            Grassi: ${meal.totalNutrition.fats}g
                         </div>
                     ` : ''}
                     <button class="btn btn-primary meal-add-btn" data-meal-type="${key}">
@@ -505,9 +505,9 @@ const App = {
                     <div class="meal-item-macros">
                         <strong>${item.grams}g</strong> - 
                         ${item.nutrition.calories} kcal | 
-                        P: ${item.nutrition.protein}g | 
-                        C: ${item.nutrition.carbs}g | 
-                        G: ${item.nutrition.fats}g
+                        Proteine: ${item.nutrition.protein}g | 
+                        Carboidrati: ${item.nutrition.carbs}g | 
+                        Grassi: ${item.nutrition.fats}g
                     </div>
                 </div>
             </div>
@@ -635,7 +635,7 @@ const App = {
                         <button class="remove-food-btn" data-index="${index}">×</button>
                     </div>
                     <div class="selected-food-info">
-                        Per 100g: ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g
+                        Per 100g: ${food.calories} kcal | Proteine: ${food.protein}g | Carboidrati: ${food.carbs}g | Grassi: ${food.fats}g
                     </div>
                     ${portion ? `
                         <div class="selected-food-portion">
@@ -643,9 +643,9 @@ const App = {
                                    min="10" max="500" step="5" data-index="${index}">
                             <span>g →</span>
                             <span>${portion.nutrition.calories} kcal | 
-                                  P: ${portion.nutrition.protein}g | 
-                                  C: ${portion.nutrition.carbs}g | 
-                                  G: ${portion.nutrition.fats}g</span>
+                                  Proteine: ${portion.nutrition.protein}g | 
+                                  Carboidrati: ${portion.nutrition.carbs}g | 
+                                  Grassi: ${portion.nutrition.fats}g</span>
                         </div>
                     ` : ''}
                 </div>
@@ -873,7 +873,7 @@ const App = {
                     <div class="food-item-name">${food.name}</div>
                     <div class="food-item-category">${FoodDatabase.getCategoryName(food.category)}</div>
                     <div class="food-item-macros">
-                        ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g (per 100g)
+                        ${food.calories} kcal | Proteine: ${food.protein}g | Carboidrati: ${food.carbs}g | Grassi: ${food.fats}g (per 100g)
                     </div>
                 </div>
             `;
