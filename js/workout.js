@@ -1796,12 +1796,11 @@ const ExerciseVideos = {
     isValidYouTubeUrl(url) {
         if (!url || typeof url !== 'string') return false;
         
-        // Only allow YouTube embed URLs with optional query parameters
-        const validPatterns = [
-            /^https:\/\/(www\.)?youtube\.com\/embed\/[a-zA-Z0-9_-]+(\?.*)?$/
-        ];
+        // Only allow YouTube embed URLs with safe query parameters
+        // Pattern allows optional query parameters like ?start=30 but validates format
+        const validPattern = /^https:\/\/(www\.)?youtube\.com\/embed\/[a-zA-Z0-9_-]{11}(\?[a-zA-Z0-9_=&-]*)?$/;
         
-        return validPatterns.some(pattern => pattern.test(url));
+        return validPattern.test(url);
     },
     
     // Get video URL for an exercise with language preference
@@ -1863,8 +1862,8 @@ const ExerciseVideos = {
                     <iframe 
                         src="${escapedUrl}" 
                         style="border: none;" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        sandbox="allow-scripts allow-same-origin allow-presentation"
+                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" 
+                        sandbox="allow-scripts allow-presentation"
                         allowfullscreen
                         loading="lazy"
                         title="Video tutorial ${escapedName}">
