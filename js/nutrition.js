@@ -230,8 +230,15 @@ const Nutrition = {
 
         // Refine portions to better match macros (iterative adjustment)
         // This optimization tries to match calories first, then balance macros
-        const maxIterations = 20;
-        for (let i = 0; i < maxIterations; i++) {
+        // 20 iterations provide good balance between accuracy and performance
+        const MAX_ITERATIONS = 20;
+        const PROTEIN_RICH_THRESHOLD = 10; // g per 100g
+        const CARB_RICH_THRESHOLD = 15; // g per 100g
+        const FAT_RICH_THRESHOLD = 5; // g per 100g
+        const MACRO_ADJUSTMENT_INCREASE = 1.05;
+        const MACRO_ADJUSTMENT_DECREASE = 0.95;
+        
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
             const currentTotal = portions.reduce((sum, p) => ({
                 calories: sum.calories + p.nutrition.calories,
                 protein: sum.protein + p.nutrition.protein,
@@ -263,24 +270,24 @@ const Nutrition = {
                 
                 // Secondary goal: balance macros based on food's macro profile
                 // If we need more protein and this food is protein-rich, increase it slightly
-                if (proteinDiff < 0 && portion.food.protein > 10) {
-                    adjustment *= 1.05;
-                } else if (proteinDiff > 0 && portion.food.protein > 10) {
-                    adjustment *= 0.95;
+                if (proteinDiff < 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (proteinDiff > 0 && portion.food.protein > PROTEIN_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // If we need more carbs and this food is carb-rich, increase it
-                if (carbsDiff < 0 && portion.food.carbs > 15) {
-                    adjustment *= 1.05;
-                } else if (carbsDiff > 0 && portion.food.carbs > 15) {
-                    adjustment *= 0.95;
+                if (carbsDiff < 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (carbsDiff > 0 && portion.food.carbs > CARB_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // If we need more fats and this food is fat-rich, increase it
-                if (fatsDiff < 0 && portion.food.fats > 5) {
-                    adjustment *= 1.05;
-                } else if (fatsDiff > 0 && portion.food.fats > 5) {
-                    adjustment *= 0.95;
+                if (fatsDiff < 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_INCREASE;
+                } else if (fatsDiff > 0 && portion.food.fats > FAT_RICH_THRESHOLD) {
+                    adjustment *= MACRO_ADJUSTMENT_DECREASE;
                 }
                 
                 // Apply adjustment
@@ -374,10 +381,10 @@ const Nutrition = {
         // Generate suggestions
         const suggestions = [];
         
-        // Check if any food category is missing
-        const hasProteinSource = portions.some(p => p.food.protein > 10);
-        const hasCarbSource = portions.some(p => p.food.carbs > 20);
-        const hasFatSource = portions.some(p => p.food.fats > 5);
+        // Check if any food category is missing (using same thresholds as optimization)
+        const hasProteinSource = portions.some(p => p.food.protein > PROTEIN_RICH_THRESHOLD);
+        const hasCarbSource = portions.some(p => p.food.carbs > CARB_RICH_THRESHOLD);
+        const hasFatSource = portions.some(p => p.food.fats > FAT_RICH_THRESHOLD);
         
         if (!hasProteinSource && adherence.protein.level !== 'excellent') {
             suggestions.push('💡 Aggiungi una fonte proteica (pesce, carne, legumi, uova)');

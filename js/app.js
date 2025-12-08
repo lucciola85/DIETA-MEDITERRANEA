@@ -622,7 +622,7 @@ const App = {
         // Add remove button handlers
         container.querySelectorAll('.remove-food-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const index = parseInt(btn.dataset.index);
+                const index = parseInt(btn.dataset.index, 10);
                 this.removeFoodFromSelection(index);
             });
         });
@@ -630,8 +630,16 @@ const App = {
         // Add portion input handlers for manual adjustment
         container.querySelectorAll('.portion-input').forEach(input => {
             input.addEventListener('change', () => {
-                const index = parseInt(input.dataset.index);
-                const newGrams = parseInt(input.value);
+                const index = parseInt(input.dataset.index, 10);
+                const newGrams = parseInt(input.value, 10);
+                
+                // Validate portion range (10-500g)
+                if (isNaN(newGrams) || newGrams < 10 || newGrams > 500) {
+                    showNotification('Grammatura deve essere tra 10g e 500g', 'error');
+                    input.value = this.calculatedPortions[index].grams; // Reset to previous value
+                    return;
+                }
+                
                 this.updatePortionManually(index, newGrams);
             });
         });
