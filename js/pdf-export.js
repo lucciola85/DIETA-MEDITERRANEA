@@ -104,10 +104,9 @@ const PDFExport = {
 
     /**
      * Generate Weekly Menu PDF
-     * @param {string} profileId - Profile ID
      * @param {Array} weekDates - Array of Date objects for the week
      */
-    async generateWeeklyMenuPDF(profileId, weekDates) {
+    async generateWeeklyMenuPDF(weekDates) {
         const { jsPDF } = window.jspdf;
         if (!jsPDF) {
             throw new Error('jsPDF library not loaded');
@@ -118,6 +117,7 @@ const PDFExport = {
         if (!profile) {
             throw new Error('No profile selected');
         }
+        const profileId = profile.id;
 
         // Get nutrition data
         const nutrition = Nutrition.calculateProfileNutrition(profile);
@@ -160,85 +160,13 @@ const PDFExport = {
         doc.text(`Settimana: ${weekRange}`, pageWidth / 2, yPos, { align: 'center' });
         yPos += 15;
 
-        // Process each day
-        for (const date of weekDates) {
-            const dayName = Meals.getDayName(date);
-            const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-            const meals = await Meals.getMealsByDate(profileId, date);
-
-            // Skip if no meals for this day
-            if (meals.length === 0) {
-                continue;
-            }
-
-            checkPageBreak(20);
-
-            // Day header
-            doc.setFontSize(14);
-            doc.setTextColor(0, 105, 148);
-            const dayHeader = `══════ ${dayName.toUpperCase()} ${dateStr} ══════`;
-            doc.text(dayHeader, pageWidth / 2, yPos, { align: 'center' });
-            yPos += 10;
-
-            // Process each meal
-            for (const meal of meals) {
-                checkPageBreak(25);
-
-                const mealTypeName = Nutrition.getMealTypeName(meal.mealType);
-
-                // Meal type name
-                doc.setFontSize(12);
-                doc.setTextColor(0, 105, 148);
-                doc.text(mealTypeName.toUpperCase(), margin, yPos);
-                yPos += 7;
-
-                // Food items
-                doc.setFontSize(10);
-                doc.setTextColor(60, 60, 60);
-                
-                meal.foodItems.forEach(item => {
-                    checkPageBreak(6);
-                    doc.text(`• ${item.foodName}: ${item.grams}g`, margin + 2, yPos);
-                    yPos += 5;
-                });
-
-                yPos += 2;
-
-                // Meal totals
-                doc.setFontSize(10);
-                doc.setTextColor(0, 105, 148);
-                const totalsText = `→ ${meal.totalNutrition.calories} kcal | Proteine: ${meal.totalNutrition.protein}g | Carboidrati: ${meal.totalNutrition.carbs}g | Grassi: ${meal.totalNutrition.fats}g`;
-                const wrappedTotals = doc.splitTextToSize(totalsText, maxWidth - 4);
-                wrappedTotals.forEach(line => {
-                    checkPageBreak(5);
-                    doc.text(line, margin + 2, yPos);
-                    yPos += 5;
-                });
-
-                yPos += 5;
-            }
-
-            // Daily totals
-            const dailyNutrition = Meals.calculateDailyNutrition(meals);
-            checkPageBreak(10);
-            
-            doc.setFontSize(11);
-            doc.setTextColor(0, 105, 148);
-            doc.setFont(undefined, 'bold');
-            doc.text(`📊 TOTALE ${dayName.toUpperCase()}: ${dailyNutrition.calories} kcal`, margin, yPos);
-            doc.setFont(undefined, 'normal');
-            yPos += 6;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(80, 80, 80);
-            doc.text(`Proteine: ${dailyNutrition.protein}g | Carboidrati: ${dailyNutrition.carbs}g | Grassi: ${dailyNutrition.fats}g | Fibre: ${dailyNutrition.fiber}g`, margin, yPos);
-            yPos += 12;
-        }
-
-        // Check if any meals were found
-        const totalMealsInWeek = (await Promise.all(
+        // Fetch all meals for the week first
+        const allWeekMeals = await Promise.all(
             weekDates.map(date => Meals.getMealsByDate(profileId, date))
-        )).flat().length;
+        );
+        
+        // Check if any meals were found
+        const totalMealsInWeek = allWeekMeals.flat().length;
 
         if (totalMealsInWeek === 0) {
             // No meals found
@@ -247,6 +175,83 @@ const PDFExport = {
             doc.text('Nessun pasto pianificato per questa settimana', pageWidth / 2, 100, { align: 'center' });
             doc.setFontSize(10);
             doc.text('Vai al Pianificatore Pasti per compilare i tuoi pasti', pageWidth / 2, 110, { align: 'center' });
+        } else {
+            // Process each day
+            for (let i = 0; i < weekDates.length; i++) {
+                const date = weekDates[i];
+                const meals = allWeekMeals[i];
+                
+                // Skip if no meals for this day
+                if (meals.length === 0) {
+                    continue;
+                }
+
+                const dayName = Meals.getDayName(date);
+                const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+
+                checkPageBreak(20);
+
+                // Day header
+                doc.setFontSize(14);
+                doc.setTextColor(0, 105, 148);
+                const dayHeader = `══════ ${dayName.toUpperCase()} ${dateStr} ══════`;
+                doc.text(dayHeader, pageWidth / 2, yPos, { align: 'center' });
+                yPos += 10;
+
+                // Process each meal
+                for (const meal of meals) {
+                    checkPageBreak(25);
+
+                    const mealTypeName = Nutrition.getMealTypeName(meal.mealType);
+
+                    // Meal type name
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 105, 148);
+                    doc.text(mealTypeName.toUpperCase(), margin, yPos);
+                    yPos += 7;
+
+                    // Food items
+                    doc.setFontSize(10);
+                    doc.setTextColor(60, 60, 60);
+                    
+                    meal.foodItems.forEach(item => {
+                        checkPageBreak(6);
+                        doc.text(`• ${item.foodName}: ${item.grams}g`, margin + 2, yPos);
+                        yPos += 5;
+                    });
+
+                    yPos += 2;
+
+                    // Meal totals
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 105, 148);
+                    const totalsText = `→ ${meal.totalNutrition.calories} kcal | Proteine: ${meal.totalNutrition.protein}g | Carboidrati: ${meal.totalNutrition.carbs}g | Grassi: ${meal.totalNutrition.fats}g`;
+                    const wrappedTotals = doc.splitTextToSize(totalsText, maxWidth - 4);
+                    wrappedTotals.forEach(line => {
+                        checkPageBreak(5);
+                        doc.text(line, margin + 2, yPos);
+                        yPos += 5;
+                    });
+
+                    yPos += 5;
+                }
+
+                // Daily totals
+                const dailyNutrition = Meals.calculateDailyNutrition(meals);
+                checkPageBreak(10);
+                
+                doc.setFontSize(11);
+                doc.setTextColor(0, 105, 148);
+                doc.setFont(undefined, 'bold');
+                doc.text(`📊 TOTALE ${dayName.toUpperCase()}: ${dailyNutrition.calories} kcal`, margin, yPos);
+                doc.setFont(undefined, 'normal');
+                yPos += 6;
+                
+                doc.setFontSize(9);
+                doc.setTextColor(80, 80, 80);
+                doc.text(`Proteine: ${dailyNutrition.protein}g | Carboidrati: ${dailyNutrition.carbs}g | Grassi: ${dailyNutrition.fats}g | Fibre: ${dailyNutrition.fiber}g`, margin, yPos);
+                yPos += 12;
+            }
         }
 
         // Footer

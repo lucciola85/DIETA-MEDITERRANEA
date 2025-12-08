@@ -1617,19 +1617,9 @@ const App = {
         }
 
         const weekDates = Meals.getWeekDates(this.currentWeek);
-        
-        // Check if there are any meals in the week
-        const allMeals = (await Promise.all(
-            weekDates.map(date => Meals.getMealsByDate(profile.id, date))
-        )).flat();
-
-        if (allMeals.length === 0) {
-            this.showToast('Nessun pasto compilato per questa settimana', 'warning');
-            return;
-        }
 
         try {
-            await PDFExport.generateWeeklyMenuPDF(profile.id, weekDates);
+            await PDFExport.generateWeeklyMenuPDF(weekDates);
             this.showToast('PDF del menù settimanale scaricato con successo!', 'success');
         } catch (error) {
             console.error('Error generating weekly menu PDF:', error);
