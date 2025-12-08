@@ -343,7 +343,8 @@ const App = {
         if (meals.length === 0) {
             summaryContainer.innerHTML = '<p style="text-align: center; color: #999;">Nessun pasto pianificato per oggi</p>';
         } else {
-            summaryContainer.innerHTML = `
+            // Show macro summary
+            const macroSummaryHTML = `
                 <div class="macro-grid">
                     <div class="stat-card">
                         <h3>Calorie</h3>
@@ -367,6 +368,40 @@ const App = {
                     </div>
                 </div>
             `;
+
+            // Show meal details
+            const mealsDetailsHTML = `
+                <div style="margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">📋 Pasti di Oggi</h3>
+                    ${meals.map(meal => {
+                        const mealTypeName = Nutrition.getMealTypeName(meal.mealType);
+                        return `
+                            <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <h4 style="margin: 0; color: var(--primary);">${mealTypeName}</h4>
+                                    <span style="font-weight: bold; color: var(--primary);">${meal.totalNutrition.calories} kcal</span>
+                                </div>
+                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.75rem;">
+                                    P: ${meal.totalNutrition.protein}g | 
+                                    C: ${meal.totalNutrition.carbs}g | 
+                                    G: ${meal.totalNutrition.fats}g |
+                                    Fibre: ${meal.totalNutrition.fiber}g
+                                </div>
+                                <div style="border-top: 1px solid #f0f0f0; padding-top: 0.75rem;">
+                                    ${meal.foodItems.map(item => `
+                                        <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.9rem;">
+                                            <span>• ${item.foodName}</span>
+                                            <span style="color: #666;">${item.grams}g</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            summaryContainer.innerHTML = macroSummaryHTML + mealsDetailsHTML;
         }
 
         // Show safety warning if deficit is too aggressive
@@ -1071,20 +1106,30 @@ const App = {
                     <div class="exercise-list">
                         ${day.exercises.map(ex => {
                             const exercise = Workout.getExercise(ex.exercise);
+                            const hasDetailedDescription = exercise.detailedDescription;
                             return `
                                 <div class="exercise-item">
                                     <div class="exercise-header">
-                                        <div>
+                                        <div style="flex: 1;">
                                             <div class="exercise-name">${exercise.name}</div>
                                             <div class="exercise-details">
                                                 ${ex.sets} serie × ${ex.reps} ripetizioni
                                                 ${ex.weight ? ` - ${ex.weight}` : ''}
                                                 ${ex.resistance ? ` - Resistenza ${ex.resistance}` : ''}
-                                                ${ex.rest ? ` - Recupero: ${ex.rest}s` : ''}
+                                                ${ex.rest !== undefined ? ` - Recupero: ${ex.rest}s` : exercise.restBetweenSets ? ` - Recupero: ${exercise.restBetweenSets}s` : ''}
+                                                ${exercise.tempo ? ` - Tempo: ${exercise.tempo}` : ''}
                                             </div>
                                             <div class="exercise-details" style="margin-top: 0.25rem;">
                                                 <small>${exercise.description}</small>
                                             </div>
+                                            ${hasDetailedDescription ? `
+                                                <button class="btn-link exercise-details-toggle" data-exercise="${ex.exercise}" style="margin-top: 0.5rem; font-size: 0.9rem;">
+                                                    📖 Vedi spiegazione dettagliata
+                                                </button>
+                                                <div class="exercise-detailed-description" id="details-${ex.exercise}" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-left: 3px solid var(--primary); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                                    ${exercise.detailedDescription}
+                                                </div>
+                                            ` : ''}
                                         </div>
                                         <div class="exercise-completed">
                                             <input type="checkbox" id="ex-${day.day}-${ex.exercise}">
@@ -1100,6 +1145,23 @@ const App = {
         }).join('');
 
         container.innerHTML = html;
+
+        // Add event listeners for detail toggles
+        container.querySelectorAll('.exercise-details-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const exerciseKey = btn.dataset.exercise;
+                const detailsDiv = document.getElementById(`details-${exerciseKey}`);
+                
+                if (detailsDiv.style.display === 'none') {
+                    detailsDiv.style.display = 'block';
+                    btn.textContent = '📖 Nascondi spiegazione';
+                } else {
+                    detailsDiv.style.display = 'none';
+                    btn.textContent = '📖 Vedi spiegazione dettagliata';
+                }
+            });
+        });
     },
 
     // Render profile page
