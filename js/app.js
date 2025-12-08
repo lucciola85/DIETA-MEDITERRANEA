@@ -124,6 +124,10 @@ const App = {
             this.exportShoppingList();
         });
 
+        document.getElementById('printShoppingList')?.addEventListener('click', () => {
+            this.printShoppingList();
+        });
+
         // Backup
         document.getElementById('exportDataBtn')?.addEventListener('click', () => {
             this.exportData();
@@ -950,9 +954,11 @@ const App = {
     // Render shopping list
     renderShoppingList(shoppingList) {
         const container = document.getElementById('shoppingList');
+        const actionsContainer = document.querySelector('.shopping-actions');
 
         if (Object.keys(shoppingList).length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #999;">Nessun alimento nella lista</p>';
+            if (actionsContainer) actionsContainer.style.display = 'none';
             return;
         }
 
@@ -979,6 +985,9 @@ const App = {
 
         container.innerHTML = html;
 
+        // Show action buttons
+        if (actionsContainer) actionsContainer.style.display = 'flex';
+
         // Add checkbox handlers
         container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
@@ -1003,6 +1012,27 @@ const App = {
         a.click();
         
         this.showToast('Lista esportata', 'success');
+    },
+
+    // Print shopping list to PDF
+    printShoppingList() {
+        const shoppingContainer = document.getElementById('shoppingList');
+        
+        if (!shoppingContainer || shoppingContainer.innerHTML.trim() === '') {
+            this.showToast('Genera prima la lista della spesa', 'error');
+            return;
+        }
+
+        // Add print class to body for print-specific styling
+        document.body.classList.add('printing-shopping-list');
+        
+        // Print
+        window.print();
+        
+        // Remove print class after printing
+        setTimeout(() => {
+            document.body.classList.remove('printing-shopping-list');
+        }, 100);
     },
 
     // Render weight page
