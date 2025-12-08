@@ -152,7 +152,7 @@ const Meals = {
                 summary: {
                     totalMeals: 0,
                     daysIncluded: [],
-                    message: 'Nessun pasto compilato nel periodo selezionato. Compila almeno un pasto per generare la lista.'
+                    message: 'Nessun pasto inserito nel Pianificatore Pasti. Aggiungi almeno un ingrediente per generare la lista.'
                 }
             };
         }
@@ -215,9 +215,10 @@ const Meals = {
             summary: {
                 totalMeals: meals.length,
                 totalDays: daysIncluded.size,
+                totalIngredients: foodMap.size,
                 daysIncluded: Array.from(daysIncluded).sort(),
                 mealsIncluded: mealsIncluded,
-                message: `Lista generata da ${meals.length} pasti in ${daysIncluded.size} giorni`
+                message: `Lista generata da ${meals.length} pasti (${foodMap.size} ingredienti totali)`
             }
         };
     },
