@@ -245,11 +245,12 @@ const Nutrition = {
             return [];
         }
         
-        // Filter foods with invalid data
+        // Filter foods with invalid data or very low calories (minimum 10 kcal/100g to prevent division issues)
+        const MIN_CALORIES = 10;
         const validFoods = foods.filter(food => 
             food && 
             typeof food.calories === 'number' && 
-            food.calories > 0
+            food.calories >= MIN_CALORIES
         );
         
         if (validFoods.length === 0) {
@@ -331,8 +332,8 @@ const Nutrition = {
             const carbsDiff = currentTotal.carbs - targetMacros.carbs;
             const fatsDiff = currentTotal.fats - targetMacros.fats;
 
-            // Check if we're close enough (within 5% for calories)
-            if (Math.abs(calorieDiff) < targetMacros.calories * 0.05) {
+            // Check if we're close enough (within 3% for calories - maintains precision)
+            if (Math.abs(calorieDiff) < targetMacros.calories * 0.03) {
                 break;
             }
 
