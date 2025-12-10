@@ -24,6 +24,31 @@ const MealOptimizer = {
     CALORIE_CONTRIBUTION_FACTOR: 0.3,
     MACRO_CONTRIBUTION_FACTOR: 0.2,
     
+    // Limiti massimi per categoria alimentare (in grammi)
+    FOOD_CATEGORY_LIMITS: {
+        'latte': 200,
+        'yogurt': 150,
+        'formaggio': 50,
+        'formaggio_fresco': 100,
+        'pane': 80,
+        'pasta': 100,
+        'riso': 90,
+        'cereali': 80,
+        'carne_rossa': 120,
+        'carne_bianca': 150,
+        'pesce': 200,
+        'uova': 120,
+        'affettati': 50,
+        'legumi': 150,
+        'verdura': 300,
+        'frutta': 200,
+        'frutta_secca': 30,
+        'olio': 15,
+        'burro': 10,
+        'miele': 20,
+        'default': 150
+    },
+    
     // Priorità di bilanciamento per tipo pasto (Dieta Mediterranea 2025)
     mealTypePriorities: {
         breakfast: {
@@ -49,7 +74,8 @@ const MealOptimizer = {
         dinner: {
             name: 'Cena',
             priorities: { carbs: 0.5, fats: 1.0, protein: 1.7 },
-            description: 'Proteine alte, carboidrati ridotti'
+            description: 'Proteine alte, carboidrati ridotti',
+            categoryOverrides: { 'pasta': 60, 'riso': 50, 'pane': 50 }
         }
     },
     
@@ -75,7 +101,7 @@ const MealOptimizer = {
         
         // Se c'è un solo alimento, calcola direttamente
         if (selectedFoods.length === 1) {
-            return this.calculateSingleFood(selectedFoods[0], target);
+            return this.calculateSingleFood(selectedFoods[0], target, mealType);
         }
         
         // Per più alimenti, usa l'algoritmo di ottimizzazione
@@ -85,7 +111,7 @@ const MealOptimizer = {
     /**
      * Calcolo per singolo alimento
      */
-    calculateSingleFood(food, target) {
+    calculateSingleFood(food, target, mealType = 'lunch') {
         // Priorità: calorie, poi proteine
         const caloriesPer100g = food.calories || 0;
         
@@ -96,6 +122,10 @@ const MealOptimizer = {
         // Calcola grammi per raggiungere target calorie
         let grams = Math.round((target.calories / caloriesPer100g) * 100);
         grams = Math.max(1, grams); // Minimo 1g
+        
+        // Applica il limite massimo per categoria
+        const maxGrams = this.getMaxGramsForFood(food, mealType);
+        grams = Math.min(grams, maxGrams);
         
         return [{
             ...food,
@@ -146,6 +176,12 @@ const MealOptimizer = {
         
         // Arrotonda a multipli di 1g e assicura minimo 1g
         currentGrams = currentGrams.map(g => Math.max(1, Math.round(g)));
+        
+        // Applica i limiti massimi per categoria
+        currentGrams = currentGrams.map((g, index) => {
+            const maxGrams = this.getMaxGramsForFood(foods[index], mealType);
+            return Math.min(g, maxGrams);
+        });
         
         // Ritorna alimenti con grammature ottimizzate
         return foods.map((food, index) => ({
@@ -223,6 +259,126 @@ const MealOptimizer = {
             carbs: Math.round((food.carbs || 0) * multiplier * 10) / 10,
             fats: Math.round((food.fats || 0) * multiplier * 10) / 10
         };
+    },
+    
+    /**
+     * Rileva la categoria dell'alimento in base al nome
+     * @param {Object} food - L'alimento da classificare
+     * @returns {String} - La categoria dell'alimento
+     */
+    detectFoodCategory(food) {
+        const name = (food.name || '').toLowerCase();
+        
+        // Latte
+        if (name.includes('latte')) return 'latte';
+        
+        // Yogurt
+        if (name.includes('yogurt')) return 'yogurt';
+        
+        // Formaggi freschi (più specifico prima)
+        if (name.includes('ricotta') || name.includes('mozzarella') || 
+            name.includes('stracchino') || name.includes('crescenza') ||
+            name.includes('spalmabile')) return 'formaggio_fresco';
+        
+        // Formaggi stagionati
+        if (name.includes('formaggio') || name.includes('parmigiano') || 
+            name.includes('pecorino') || name.includes('grana') ||
+            name.includes('feta') || name.includes('caciotta') ||
+            name.includes('scamorza') || name.includes('gorgonzola') ||
+            name.includes('emmental') || name.includes('provolone') ||
+            name.includes('asiago') || name.includes('fontina')) return 'formaggio';
+        
+        // Pane
+        if (name.includes('pane') || name.includes('fette') || name.includes('fetta')) return 'pane';
+        
+        // Pasta
+        if (name.includes('pasta') || name.includes('spaghetti') || 
+            name.includes('penne') || name.includes('fusilli') ||
+            name.includes('rigatoni') || name.includes('linguine') ||
+            name.includes('tagliatelle') || name.includes('farfalle')) return 'pasta';
+        
+        // Riso
+        if (name.includes('riso')) return 'riso';
+        
+        // Cereali/Fiocchi
+        if (name.includes('fiocchi') || name.includes('avena') || 
+            name.includes('cereali') || name.includes('muesli') ||
+            name.includes('corn flakes')) return 'cereali';
+        
+        // Carne bianca
+        if (name.includes('pollo') || name.includes('tacchino') || 
+            name.includes('coniglio') || name.includes('galletto')) return 'carne_bianca';
+        
+        // Carne rossa
+        if (name.includes('manzo') || name.includes('vitello') || 
+            name.includes('maiale') || name.includes('agnello') ||
+            name.includes('vitellone')) return 'carne_rossa';
+        
+        // Pesce
+        if (name.includes('salmone') || name.includes('tonno') || 
+            name.includes('pesce') || name.includes('orata') ||
+            name.includes('branzino') || name.includes('merluzzo') ||
+            name.includes('trota') || name.includes('sgombro') ||
+            name.includes('sardine') || name.includes('acciughe') ||
+            name.includes('gamberi') || name.includes('calamari') ||
+            name.includes('polpo') || name.includes('cozze')) return 'pesce';
+        
+        // Uova
+        if (name.includes('uovo') || name.includes('uova')) return 'uova';
+        
+        // Affettati
+        if (name.includes('prosciutto') || name.includes('salame') || 
+            name.includes('bresaola') || name.includes('speck') ||
+            name.includes('mortadella') || name.includes('coppa') ||
+            name.includes('pancetta') || name.includes('affettato')) return 'affettati';
+        
+        // Legumi
+        if (name.includes('legumi') || name.includes('fagioli') || 
+            name.includes('lenticchie') || name.includes('ceci') ||
+            name.includes('fave') || name.includes('piselli') ||
+            name.includes('soia')) return 'legumi';
+        
+        // Verdura
+        if (food.category === 'vegetables') return 'verdura';
+        
+        // Frutta secca
+        if (name.includes('noci') || name.includes('mandorle') || 
+            name.includes('nocciole') || name.includes('pistacchi') ||
+            name.includes('anacardi') || name.includes('pinoli') ||
+            name.includes('arachidi') || name.includes('semi')) return 'frutta_secca';
+        
+        // Frutta
+        if (food.category === 'fruits') return 'frutta';
+        
+        // Olio
+        if (name.includes('olio') && !name.includes('burro')) return 'olio';
+        
+        // Burro
+        if (name.includes('burro') && !name.includes('arachidi') && !name.includes('mandorle')) return 'burro';
+        
+        // Miele
+        if (name.includes('miele')) return 'miele';
+        
+        return 'default';
+    },
+    
+    /**
+     * Ottiene il limite massimo di grammi per un alimento in base al tipo di pasto
+     * @param {Object} food - L'alimento
+     * @param {String} mealType - Il tipo di pasto
+     * @returns {Number} - Il limite massimo in grammi
+     */
+    getMaxGramsForFood(food, mealType) {
+        const category = this.detectFoodCategory(food);
+        const mealConfig = this.mealTypePriorities[mealType];
+        
+        // Verifica se c'è un override specifico per questo pasto (es. cena)
+        if (mealConfig?.categoryOverrides?.[category]) {
+            return mealConfig.categoryOverrides[category];
+        }
+        
+        // Altrimenti usa il limite standard della categoria
+        return this.FOOD_CATEGORY_LIMITS[category] || this.FOOD_CATEGORY_LIMITS['default'];
     }
 };
 
