@@ -945,10 +945,6 @@ const App = {
     calculateMealPortions() {
         if (this.selectedFoods.length === 0) return;
 
-        console.log('🔄 Calculating optimal portions...');
-        console.log('Target macros:', this.currentMealTarget);
-        console.log('Selected foods:', this.selectedFoods);
-
         // Use MealOptimizer for better results
         const optimizedFoods = MealOptimizer.calculateOptimalGrams(
             this.selectedFoods,
@@ -959,8 +955,6 @@ const App = {
                 fats: this.currentMealTarget.fats
             }
         );
-
-        console.log('✅ Optimized portions calculated:', optimizedFoods);
 
         // Convert to expected format
         this.calculatedPortions = optimizedFoods.map(food => ({
