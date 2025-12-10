@@ -4,6 +4,26 @@
  */
 
 const MealOptimizer = {
+    // Costanti di configurazione per l'ottimizzazione
+    MAX_ITERATIONS: 100,
+    MIN_MACRO_PER_GRAM: 0.1, // Soglia minima per considerare un macro significativo (g per 1g di alimento)
+    
+    // Soglie di convergenza per l'algoritmo iterativo
+    CALORIE_CONVERGENCE_THRESHOLD: 5,
+    PROTEIN_CONVERGENCE_THRESHOLD: 2,
+    CARBS_CONVERGENCE_THRESHOLD: 2,
+    FATS_CONVERGENCE_THRESHOLD: 2,
+    
+    // Pesi per ogni macro nell'ottimizzazione
+    CALORIE_WEIGHT: 1.0,
+    PROTEIN_WEIGHT: 0.8,
+    CARBS_WEIGHT: 0.6,
+    FATS_WEIGHT: 0.6,
+    
+    // Fattori di contributo per l'aggiustamento delle grammature
+    CALORIE_CONTRIBUTION_FACTOR: 0.3,
+    MACRO_CONTRIBUTION_FACTOR: 0.2,
+    
     /**
      * Calcola le grammature ottimali per raggiungere il target del pasto
      * @param {Array} selectedFoods - Alimenti selezionati con i loro valori nutrizionali per 100g
@@ -69,8 +89,7 @@ const MealOptimizer = {
         });
         
         // Iterazioni per ottimizzare
-        const maxIterations = 100;
-        const tolerance = 0.5; // Tolleranza in grammi
+        const maxIterations = this.MAX_ITERATIONS;
         
         for (let iter = 0; iter < maxIterations; iter++) {
             const currentTotals = this.calculateTotals(foods, currentGrams);
@@ -84,10 +103,10 @@ const MealOptimizer = {
             };
             
             // Se siamo abbastanza vicini, esci
-            if (Math.abs(errors.calories) < 5 && 
-                Math.abs(errors.protein) < 2 && 
-                Math.abs(errors.carbs) < 2 && 
-                Math.abs(errors.fats) < 2) {
+            if (Math.abs(errors.calories) < this.CALORIE_CONVERGENCE_THRESHOLD && 
+                Math.abs(errors.protein) < this.PROTEIN_CONVERGENCE_THRESHOLD && 
+                Math.abs(errors.carbs) < this.CARBS_CONVERGENCE_THRESHOLD && 
+                Math.abs(errors.fats) < this.FATS_CONVERGENCE_THRESHOLD) {
                 break;
             }
             
@@ -113,14 +132,6 @@ const MealOptimizer = {
         const newGrams = [...currentGrams];
         const n = foods.length;
         
-        // Peso per ogni macro nell'ottimizzazione
-        const weights = {
-            calories: 1.0,
-            protein: 0.8,
-            carbs: 0.6,
-            fats: 0.6
-        };
-        
         for (let i = 0; i < n; i++) {
             const food = foods[i];
             let adjustment = 0;
@@ -133,16 +144,16 @@ const MealOptimizer = {
             
             // Contributo di ogni macro all'aggiustamento
             if (caloriesPer1g > 0) {
-                adjustment += (errors.calories / n) / caloriesPer1g * weights.calories * 0.3;
+                adjustment += (errors.calories / n) / caloriesPer1g * this.CALORIE_WEIGHT * this.CALORIE_CONTRIBUTION_FACTOR;
             }
-            if (proteinPer1g > 0.1) {
-                adjustment += (errors.protein / n) / proteinPer1g * weights.protein * 0.2;
+            if (proteinPer1g > this.MIN_MACRO_PER_GRAM) {
+                adjustment += (errors.protein / n) / proteinPer1g * this.PROTEIN_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
             }
-            if (carbsPer1g > 0.1) {
-                adjustment += (errors.carbs / n) / carbsPer1g * weights.carbs * 0.2;
+            if (carbsPer1g > this.MIN_MACRO_PER_GRAM) {
+                adjustment += (errors.carbs / n) / carbsPer1g * this.CARBS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
             }
-            if (fatsPer1g > 0.1) {
-                adjustment += (errors.fats / n) / fatsPer1g * weights.fats * 0.2;
+            if (fatsPer1g > this.MIN_MACRO_PER_GRAM) {
+                adjustment += (errors.fats / n) / fatsPer1g * this.FATS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
             }
             
             newGrams[i] = Math.max(1, newGrams[i] + adjustment);
