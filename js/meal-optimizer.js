@@ -25,6 +25,7 @@ const MealOptimizer = {
     MACRO_CONTRIBUTION_FACTOR: 0.2,
     
     // Limiti massimi per categoria alimentare (in grammi)
+    // Basati sulle linee guida della Dieta Mediterranea 2025
     FOOD_CATEGORY_LIMITS: {
         'latte': 200,
         'yogurt': 150,
@@ -263,6 +264,7 @@ const MealOptimizer = {
     
     /**
      * Rileva la categoria dell'alimento in base al nome
+     * Fallback: usa la proprietà food.category se disponibile
      * @param {Object} food - L'alimento da classificare
      * @returns {String} - La categoria dell'alimento
      */
@@ -350,11 +352,12 @@ const MealOptimizer = {
         // Frutta
         if (food.category === 'fruits') return 'frutta';
         
-        // Olio
-        if (name.includes('olio') && !name.includes('burro')) return 'olio';
+        // Olio (esclude burro di... e olio contenuto in altri prodotti)
+        if (name.includes('olio') && !name.includes('burro') && !name.includes('sott\'olio')) return 'olio';
         
-        // Burro
-        if (name.includes('burro') && !name.includes('arachidi') && !name.includes('mandorle')) return 'burro';
+        // Burro (esclude burro di arachidi, mandorle, nocciole, pistacchi)
+        if (name.includes('burro') && !name.includes('arachidi') && !name.includes('mandorle') && 
+            !name.includes('nocciole') && !name.includes('pistacchi')) return 'burro';
         
         // Miele
         if (name.includes('miele')) return 'miele';
