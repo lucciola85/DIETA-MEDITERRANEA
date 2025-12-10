@@ -931,20 +931,13 @@ const App = {
         if (!this.calculatedPortions || !this.calculatedPortions[index]) return;
 
         newGrams = parseInt(newGrams, 10);
-        if (isNaN(newGrams) || newGrams < 1) newGrams = 1;
+        if (isNaN(newGrams) || newGrams < Nutrition.MIN_PORTION_GRAMS) newGrams = Nutrition.MIN_PORTION_GRAMS;
 
         this.calculatedPortions[index].grams = newGrams;
 
         // RICALCOLA NUTRIENTI
         const food = this.calculatedPortions[index].food;
-        const multiplier = newGrams / 100;
-        this.calculatedPortions[index].nutrition = {
-            calories: Math.round((food.calories || 0) * multiplier),
-            protein: Math.round((food.protein || 0) * multiplier * 10) / 10,
-            carbs: Math.round((food.carbs || 0) * multiplier * 10) / 10,
-            fats: Math.round((food.fats || 0) * multiplier * 10) / 10,
-            fiber: Math.round((food.fiber || 0) * multiplier * 10) / 10
-        };
+        this.calculatedPortions[index].nutrition = Nutrition.calculateFoodNutrition(food, newGrams);
 
         // AGGIORNA UI
         const container = document.getElementById('selectedFoodsList');
