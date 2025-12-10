@@ -844,7 +844,7 @@ const App = {
             calculateBtn.style.display = 'block';
             calculateBtn.disabled = false;
         } else {
-            // Hide once calculated (auto-calculated)
+            // Hide once calculated
             calculateBtn.style.display = 'none';
         }
 
@@ -914,14 +914,9 @@ const App = {
     removeFoodFromSelection(index) {
         this.selectedFoods.splice(index, 1);
         
-        // Automatically recalculate portions after removing a food
-        if (this.selectedFoods.length > 0) {
-            this.calculateMealPortions();
-        } else {
-            // Clear calculations if no foods remain
-            this.calculatedPortions = null;
-            this.updateSelectedFoodsDisplay();
-        }
+        // Clear calculations when removing a food
+        this.calculatedPortions = null;
+        this.updateSelectedFoodsDisplay();
         
         this.renderFoodList(FoodDatabase.getAllFoods());
     },
@@ -1249,8 +1244,9 @@ const App = {
             
             this.selectedFoods.push(food);
             
-            // Automatically calculate portions when adding a food
-            this.calculateMealPortions();
+            // Clear calculated portions when adding a new food
+            this.calculatedPortions = null;
+            this.updateSelectedFoodsDisplay();
             
             this.renderFoodListByMacro();
         }
