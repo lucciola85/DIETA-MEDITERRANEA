@@ -833,37 +833,43 @@ const App = {
 
         if (this.selectedFoods.length === 0) {
             container.innerHTML = '<p class="empty-message">Seleziona fino a 5 ingredienti dalla lista</p>';
-            calculateBtn.style.display = 'none'; // Hide auto-calculate button
+            calculateBtn.style.display = 'none';
             saveMealBtn.style.display = 'none';
             mealAnalysis.style.display = 'none';
             return;
         }
 
-        // Hide the calculate button since portions are now auto-calculated
-        calculateBtn.style.display = 'none';
+        // Show calculate button if portions not calculated yet
+        if (!this.calculatedPortions) {
+            calculateBtn.style.display = 'block';
+            calculateBtn.disabled = false;
+        } else {
+            // Hide once calculated (auto-calculated)
+            calculateBtn.style.display = 'none';
+        }
 
-        // Show selected foods
+        // Show selected foods with optimized portions
         const html = this.selectedFoods.map((food, index) => {
             const portion = this.calculatedPortions ? this.calculatedPortions[index] : null;
             
             return `
-                <div class="selected-food-item ${portion ? 'calculated' : ''}">
+                <div class="selected-food-item ${portion ? 'optimized' : ''}">
                     <div class="selected-food-header">
                         <div class="selected-food-name">${food.name}</div>
                         <button class="remove-food-btn" data-index="${index}">×</button>
                     </div>
                     <div class="selected-food-info">
-                        Per 100g: ${food.calories} kcal | Proteine: ${food.protein}g | Carboidrati: ${food.carbs}g | Grassi: ${food.fats}g
+                        Per 100g: ${food.calories} kcal | P: ${food.protein}g | C: ${food.carbs}g | G: ${food.fats}g
                     </div>
                     ${portion ? `
-                        <div class="selected-food-portion">
-                            <input type="number" class="portion-input" value="${portion.grams}" 
+                        <div class="food-grams-optimized">
+                            <input type="number" class="grams-input" value="${portion.grams}" 
                                    min="10" max="500" step="5" data-index="${index}">
-                            <span>g →</span>
-                            <span>${portion.nutrition.calories} kcal | 
-                                  Proteine: ${portion.nutrition.protein}g | 
-                                  Carboidrati: ${portion.nutrition.carbs}g | 
-                                  Grassi: ${portion.nutrition.fats}g</span>
+                            <span class="grams-label">g</span>
+                        </div>
+                        <div class="food-nutrition">
+                            <span class="calories">${portion.nutrition.calories} kcal</span>
+                            <span class="macros">P: ${portion.nutrition.protein}g | C: ${portion.nutrition.carbs}g | G: ${portion.nutrition.fats}g</span>
                         </div>
                     ` : ''}
                 </div>
@@ -881,7 +887,7 @@ const App = {
         });
 
         // Add portion input handlers for manual adjustment
-        container.querySelectorAll('.portion-input').forEach(input => {
+        container.querySelectorAll('.grams-input').forEach(input => {
             input.addEventListener('change', () => {
                 const index = parseInt(input.dataset.index, 10);
                 const newGrams = parseInt(input.value, 10);
@@ -939,11 +945,23 @@ const App = {
     calculateMealPortions() {
         if (this.selectedFoods.length === 0) return;
 
-        // Calculate optimal portions
-        this.calculatedPortions = Nutrition.calculateOptimalPortions(
-            this.selectedFoods, 
-            this.currentMealTarget
+        // Use MealOptimizer for better results
+        const optimizedFoods = MealOptimizer.calculateOptimalGrams(
+            this.selectedFoods,
+            {
+                calories: this.currentMealTarget.calories,
+                protein: this.currentMealTarget.protein,
+                carbs: this.currentMealTarget.carbs,
+                fats: this.currentMealTarget.fats
+            }
         );
+
+        // Convert to expected format
+        this.calculatedPortions = optimizedFoods.map(food => ({
+            food: food,
+            grams: food.grams,
+            nutrition: food.calculatedNutrients || Nutrition.calculateFoodNutrition(food, food.grams)
+        }));
 
         // Update display
         this.updateSelectedFoodsDisplay();
