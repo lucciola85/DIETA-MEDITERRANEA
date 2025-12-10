@@ -853,7 +853,7 @@ const App = {
             const portion = this.calculatedPortions ? this.calculatedPortions[index] : null;
             
             return `
-                <div class="selected-food-item ${portion ? 'optimized' : ''}">
+                <div class="selected-food-item ${portion ? 'optimized' : ''}" data-index="${index}">
                     <div class="selected-food-header">
                         <div class="selected-food-name">${food.name}</div>
                         <button class="remove-food-btn" data-index="${index}">×</button>
@@ -888,7 +888,7 @@ const App = {
 
         // Add portion input handlers for manual adjustment
         container.querySelectorAll('.grams-input').forEach(input => {
-            input.addEventListener('change', () => {
+            input.addEventListener('input', () => {
                 const index = parseInt(input.dataset.index, 10);
                 const newGrams = parseInt(input.value, 10);
                 
@@ -929,21 +929,45 @@ const App = {
     // Update portion manually
     updatePortionManually(index, newGrams) {
         if (!this.calculatedPortions || !this.calculatedPortions[index]) return;
-        
-        // Update the grams
+
+        newGrams = parseInt(newGrams, 10);
+        if (isNaN(newGrams) || newGrams < 1) newGrams = 1;
+
         this.calculatedPortions[index].grams = newGrams;
-        
-        // Recalculate nutrition for this portion
+
+        // RICALCOLA NUTRIENTI
         const food = this.calculatedPortions[index].food;
-        this.calculatedPortions[index].nutrition = Nutrition.calculateFoodNutrition(food, newGrams);
-        
-        // Update display
+        const multiplier = newGrams / 100;
+        this.calculatedPortions[index].nutrition = {
+            calories: Math.round((food.calories || 0) * multiplier),
+            protein: Math.round((food.protein || 0) * multiplier * 10) / 10,
+            carbs: Math.round((food.carbs || 0) * multiplier * 10) / 10,
+            fats: Math.round((food.fats || 0) * multiplier * 10) / 10,
+            fiber: Math.round((food.fiber || 0) * multiplier * 10) / 10
+        };
+
+        // AGGIORNA UI
+        const container = document.getElementById('selectedFoodsList');
+        const foodElement = container.querySelector(`[data-index="${index}"]`);
+        if (foodElement) {
+            const caloriesEl = foodElement.querySelector('.calories');
+            const macrosEl = foodElement.querySelector('.macros');
+            if (caloriesEl) caloriesEl.textContent = `${this.calculatedPortions[index].nutrition.calories} kcal`;
+            if (macrosEl) {
+                const n = this.calculatedPortions[index].nutrition;
+                macrosEl.textContent = `P: ${n.protein}g | C: ${n.carbs}g | G: ${n.fats}g`;
+            }
+        }
+
         this.displayMealAnalysis();
     },
 
     // Calculate meal portions
     calculateMealPortions() {
         if (this.selectedFoods.length === 0) return;
+
+        const modal = document.getElementById('foodModal');
+        const mealType = modal.dataset.mealType || 'lunch';
 
         // Use MealOptimizer for better results
         const optimizedFoods = MealOptimizer.calculateOptimalGrams(
@@ -953,7 +977,8 @@ const App = {
                 protein: this.currentMealTarget.protein,
                 carbs: this.currentMealTarget.carbs,
                 fats: this.currentMealTarget.fats
-            }
+            },
+            mealType  // PASSA IL TIPO DI PASTO
         );
 
         // Convert to expected format

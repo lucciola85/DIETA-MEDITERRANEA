@@ -24,13 +24,43 @@ const MealOptimizer = {
     CALORIE_CONTRIBUTION_FACTOR: 0.3,
     MACRO_CONTRIBUTION_FACTOR: 0.2,
     
+    // Priorità di bilanciamento per tipo pasto (Dieta Mediterranea 2025)
+    mealTypePriorities: {
+        breakfast: {
+            name: 'Colazione',
+            priorities: { carbs: 1.6, fats: 1.2, protein: 0.7 },
+            description: 'Carboidrati complessi per energia mattutina'
+        },
+        morningSnack: {
+            name: 'Spuntino Mattina',
+            priorities: { carbs: 1.0, fats: 0.9, protein: 1.3 },
+            description: 'Frutta e proteine leggere'
+        },
+        lunch: {
+            name: 'Pranzo',
+            priorities: { carbs: 1.4, fats: 1.0, protein: 1.2 },
+            description: 'Pasto principale equilibrato'
+        },
+        afternoonSnack: {
+            name: 'Merenda',
+            priorities: { carbs: 0.8, fats: 1.4, protein: 1.0 },
+            description: 'Grassi buoni da frutta secca'
+        },
+        dinner: {
+            name: 'Cena',
+            priorities: { carbs: 0.5, fats: 1.0, protein: 1.7 },
+            description: 'Proteine alte, carboidrati ridotti'
+        }
+    },
+    
     /**
      * Calcola le grammature ottimali per raggiungere il target del pasto
      * @param {Array} selectedFoods - Alimenti selezionati con i loro valori nutrizionali per 100g
      * @param {Object} targetMacros - Target del pasto {calories, protein, carbs, fats}
+     * @param {String} mealType - Tipo di pasto (breakfast, lunch, dinner, etc.)
      * @returns {Array} - Alimenti con grammature ottimizzate
      */
-    calculateOptimalGrams(selectedFoods, targetMacros) {
+    calculateOptimalGrams(selectedFoods, targetMacros, mealType = 'lunch') {
         if (!selectedFoods || selectedFoods.length === 0) {
             return [];
         }
@@ -49,7 +79,7 @@ const MealOptimizer = {
         }
         
         // Per più alimenti, usa l'algoritmo di ottimizzazione
-        return this.optimizeMultipleFoods(selectedFoods, target);
+        return this.optimizeMultipleFoods(selectedFoods, target, mealType);
     },
     
     /**
@@ -77,7 +107,7 @@ const MealOptimizer = {
     /**
      * Ottimizzazione per più alimenti usando algoritmo iterativo
      */
-    optimizeMultipleFoods(foods, target) {
+    optimizeMultipleFoods(foods, target, mealType = 'lunch') {
         const n = foods.length;
         
         // Inizializza con distribuzione equa delle calorie
@@ -111,7 +141,7 @@ const MealOptimizer = {
             }
             
             // Aggiusta le grammature
-            currentGrams = this.adjustGrams(foods, currentGrams, errors, target);
+            currentGrams = this.adjustGrams(foods, currentGrams, errors, target, mealType);
         }
         
         // Arrotonda a multipli di 1g e assicura minimo 1g
@@ -128,9 +158,12 @@ const MealOptimizer = {
     /**
      * Aggiusta le grammature in base agli errori
      */
-    adjustGrams(foods, currentGrams, errors, target) {
+    adjustGrams(foods, currentGrams, errors, target, mealType = 'lunch') {
         const newGrams = [...currentGrams];
         const n = foods.length;
+        
+        // Ottieni le priorità per questo tipo di pasto
+        const priorities = this.mealTypePriorities[mealType]?.priorities || { carbs: 1.0, fats: 1.0, protein: 1.0 };
         
         for (let i = 0; i < n; i++) {
             const food = foods[i];
@@ -142,18 +175,18 @@ const MealOptimizer = {
             const carbsPer1g = (food.carbs || 0) / 100;
             const fatsPer1g = (food.fats || 0) / 100;
             
-            // Contributo di ogni macro all'aggiustamento
+            // Contributo di ogni macro all'aggiustamento con priorità per tipo pasto
             if (caloriesPer1g > 0) {
                 adjustment += (errors.calories / n) / caloriesPer1g * this.CALORIE_WEIGHT * this.CALORIE_CONTRIBUTION_FACTOR;
             }
             if (proteinPer1g > this.MIN_MACRO_PER_GRAM) {
-                adjustment += (errors.protein / n) / proteinPer1g * this.PROTEIN_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
+                adjustment += (errors.protein / n) / proteinPer1g * this.PROTEIN_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR * priorities.protein;
             }
             if (carbsPer1g > this.MIN_MACRO_PER_GRAM) {
-                adjustment += (errors.carbs / n) / carbsPer1g * this.CARBS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
+                adjustment += (errors.carbs / n) / carbsPer1g * this.CARBS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR * priorities.carbs;
             }
             if (fatsPer1g > this.MIN_MACRO_PER_GRAM) {
-                adjustment += (errors.fats / n) / fatsPer1g * this.FATS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR;
+                adjustment += (errors.fats / n) / fatsPer1g * this.FATS_WEIGHT * this.MACRO_CONTRIBUTION_FACTOR * priorities.fats;
             }
             
             newGrams[i] = Math.max(1, newGrams[i] + adjustment);
