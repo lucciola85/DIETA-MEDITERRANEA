@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test MealOptimizer</title>
+</head>
+<body>
+    <h1>Testing MealOptimizer</h1>
+    <div id="results"></div>
+
+    <script src="js/meal-optimizer.js"></script>
+    <script>
+        // Test data
+        const testFoods = [
+            { name: 'Petto di pollo', calories: 165, protein: 31, carbs: 0, fats: 3.6 },
+            { name: 'Riso basmati', calories: 130, protein: 2.7, carbs: 28, fats: 0.3 },
+            { name: 'Olio d\'oliva', calories: 884, protein: 0, carbs: 0, fats: 100 }
+        ];
+
+        const target = {
+            calories: 600,
+            protein: 35,
+            carbs: 70,
+            fats: 20
+        };
+
+        console.log('Testing MealOptimizer...');
+        console.log('Input foods:', testFoods);
+        console.log('Target:', target);
+
+        const result = MealOptimizer.calculateOptimalGrams(testFoods, target);
+        
+        console.log('Result:', result);
+
+        // Display results
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '<h2>Results:</h2>';
+        
+        result.forEach(item => {
+            resultsDiv.innerHTML += `
+                <div>
+                    <strong>${item.name}</strong>: ${item.grams}g<br>
+                    Calories: ${item.calculatedNutrients.calories} kcal |
+                    Protein: ${item.calculatedNutrients.protein}g |
+                    Carbs: ${item.calculatedNutrients.carbs}g |
+                    Fats: ${item.calculatedNutrients.fats}g
+                </div>
+                <br>
+            `;
+        });
+
+        // Calculate totals
+        const totals = result.reduce((sum, item) => ({
+            calories: sum.calories + item.calculatedNutrients.calories,
+            protein: sum.protein + item.calculatedNutrients.protein,
+            carbs: sum.carbs + item.calculatedNutrients.carbs,
+            fats: sum.fats + item.calculatedNutrients.fats
+        }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
+
+        resultsDiv.innerHTML += `
+            <h2>Totals:</h2>
+            <div>
+                Calories: ${totals.calories} / ${target.calories} kcal<br>
+                Protein: ${totals.protein.toFixed(1)} / ${target.protein}g<br>
+                Carbs: ${totals.carbs.toFixed(1)} / ${target.carbs}g<br>
+                Fats: ${totals.fats.toFixed(1)} / ${target.fats}g
+            </div>
+        `;
+    </script>
+</body>
+</html>
