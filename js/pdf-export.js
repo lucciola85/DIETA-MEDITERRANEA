@@ -57,10 +57,10 @@ const PDFExport = {
      * @param {string} weekRange - Week range string (e.g., "09-15 Dicembre 2025")
      */
     generateShoppingListPDF(shoppingListData, weekRange) {
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-            throw new Error('jsPDF library not loaded');
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('jsPDF library not loaded. Please check your internet connection or disable ad blockers.');
         }
+        const { jsPDF } = window.jspdf;
 
         const doc = new jsPDF();
         let yPos = 20;
@@ -155,10 +155,10 @@ const PDFExport = {
      * @param {Array} weekDates - Array of Date objects for the week
      */
     async generateWeeklyMenuPDF(weekDates) {
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-            throw new Error('jsPDF library not loaded');
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('jsPDF library not loaded. Please check your internet connection or disable ad blockers.');
         }
+        const { jsPDF } = window.jspdf;
 
         // Get profile
         const profile = Profiles.getCurrentProfile();
@@ -333,10 +333,10 @@ const PDFExport = {
      * @param {Object} options.program - Workout program from Workout.getProgram()
      */
     async generateWorkoutPDF({ profile, level, program }) {
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-            throw new Error('jsPDF library not loaded');
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('jsPDF library not loaded. Please check your internet connection or disable ad blockers.');
         }
+        const { jsPDF } = window.jspdf;
 
         const doc = new jsPDF();
         let yPos = 20;
@@ -404,11 +404,11 @@ const PDFExport = {
 
             // Exercises for this day
             for (const ex of day.exercises) {
-                // Get exercise details - Workout module must be loaded before this function is called
-                if (!window.Workout) {
+                // Get exercise details - use global Workout object if available
+                if (typeof Workout === 'undefined') {
                     throw new Error('Workout module not loaded');
                 }
-                const exercise = window.Workout.getExercise(ex.exercise);
+                const exercise = Workout.getExercise(ex.exercise);
                 
                 checkPageBreak(25);
 
