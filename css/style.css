@@ -1857,3 +1857,57 @@ body {
         margin-bottom: 12px;
     }
 }
+
+/* Optimized Meal Result Styles */
+.optimized-meal-result {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    border: 2px solid #4caf50;
+}
+
+.optimized-meal-result h4 {
+    color: #2e7d32;
+    margin: 0 0 15px 0;
+}
+
+.food-item-optimized {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+.food-grams {
+    font-weight: bold;
+    color: #006994;
+}
+
+.macro-comparison {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.macro-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.macro-row .achieved {
+    font-weight: bold;
+    color: #006994;
+}
+
+.macro-row .target {
+    color: #666;
+}
+
+.macro-row .status {
+    margin-left: auto;
+}
