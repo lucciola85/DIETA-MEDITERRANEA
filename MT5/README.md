@@ -1,3 +1,48 @@
+# MT5 Expert Advisors Collection
+
+Questa cartella contiene una collezione di Expert Advisor professionali per MetaTrader 5.
+
+## Expert Advisors Disponibili
+
+| EA | Descrizione | Strumento Consigliato | Timeframe |
+|----|-------------|----------------------|-----------|
+| **PullbackMaster_EA** | Specializzato nei pullback/rimbalzi a S/R | EUR/USD, GBP/USD | M15, M30 |
+| **DAX40_Hybrid_Pro** | Sistema ibrido per indici tedeschi | DAX40/GER40 | H1 |
+| **GAMORAFX** | Multi-strategia Forex classico | Coppie Major | H1 |
+
+---
+
+# PullbackMaster EA ⭐ NEW
+
+Expert Advisor specializzato nel trading di pullback sui rimbalzi a supporti e resistenze.
+
+**Documentazione completa**: [PullbackMaster_README.md](PullbackMaster_README.md)
+
+### Caratteristiche Principali
+- 🎯 Trading sui rimbalzi S/R senza breakout
+- 📊 Rilevamento automatico livelli chiave
+- ⚡ Operatività intraday ad alta frequenza
+- 💰 Money management personalizzabile
+- 🛡️ Sistema di protezione completo
+
+### Quick Start
+1. Applica l'EA su EUR/USD M15
+2. Carica il preset `PullbackMaster_EURUSD_M15.set`
+3. Attiva AutoTrading
+
+---
+
+# DAX40 Hybrid Pro
+
+Expert Advisor professionale per il trading sull'indice DAX40/GER40.
+
+### Caratteristiche
+- Sistema ibrido adattivo ai regimi di mercato
+- Strategie trend/range/breakout
+- Ottimizzato per la sessione europea
+
+---
+
 # GAMORAFX - MT5 Expert Advisor
 
 ## Overview

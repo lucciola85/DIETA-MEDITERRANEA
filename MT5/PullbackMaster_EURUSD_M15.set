@@ -1,0 +1,80 @@
+; PullbackMaster EA - Conservative EUR/USD M15 Settings
+; Optimized for high win rate intraday pullback trading
+; Risk Profile: Conservative
+
+; === GENERAL SETTINGS ===
+InpEAName=PullbackMaster
+InpMagicNumber=202412
+InpTradeComment=PBM
+InpTimeframe=15
+InpTradeDirection=0
+
+; === S/R DETECTION ===
+InpSRMethod=0
+InpSwingLookback=10
+InpSRStrength=2
+InpSRZoneATRMult=0.3
+InpMaxSRLevels=5
+
+; === PULLBACK DETECTION ===
+InpBounceATRMult=0.5
+InpMinBounceCandles=2
+InpRequireRejection=true
+InpMinWickRatio=0.5
+
+; === TREND FILTER ===
+InpUseTrendFilter=true
+InpEMAPeriod=50
+InpTrendTimeframe=16385
+
+; === RSI FILTER ===
+InpUseRSIFilter=true
+InpRSIPeriod=14
+InpRSIOverbought=65
+InpRSIOversold=35
+
+; === MONEY MANAGEMENT ===
+InpLotMode=1
+InpFixedLot=0.1
+InpRiskPercent=1.0
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+InpMaxPositions=2
+
+; === PROTECTION SYSTEM ===
+InpMaxDailyLoss=3.0
+InpMaxDrawdown=10.0
+InpMaxDailyTrades=8
+InpMinMarginLevel=200.0
+
+; === SESSION FILTER ===
+InpUseSessionFilter=true
+InpSessionStart=8
+InpSessionEnd=18
+InpAvoidNews=true
+
+; === STOP LOSS & TAKE PROFIT ===
+InpUseDynamicSLTP=true
+InpFixedSL=200
+InpFixedTP=300
+InpSLATRMultiplier=1.5
+InpRiskReward=2.0
+InpMinSLPoints=100
+InpMaxSLPoints=400
+
+; === POSITION MANAGEMENT ===
+InpUseBreakeven=true
+InpBreakevenRatio=0.5
+InpBreakevenOffset=10
+InpUseTrailingStop=true
+InpTrailingRatio=0.7
+InpTrailingDistance=100
+InpUsePartialClose=false
+InpPartialPercent=50.0
+InpPartialRatio=0.5
+
+; === DISPLAY ===
+InpShowDashboard=true
+InpShowSRLevels=true
+InpSupportColor=65280
+InpResistanceColor=255
