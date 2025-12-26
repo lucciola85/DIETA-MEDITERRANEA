@@ -185,6 +185,11 @@ double g_bufATR[];
 SRLevel g_supportLevels[];
 SRLevel g_resistanceLevels[];
 
+// Constants
+#define MAX_PARTIAL_CLOSE_TRACKING 50   // Maximum positions to track for partial close
+#define RSI_FILTER_BUFFER 20            // RSI filter buffer zone around oversold/overbought
+#define TREND_TOLERANCE_PERCENT 0.005   // 0.5% tolerance for trend filter
+
 // Trading state variables
 double g_initialBalance;
 double g_dailyStartBalance;
@@ -231,7 +236,7 @@ int OnInit()
    g_lastBarTime = 0;
    g_lastTradeDay = 0;
    g_dailyTradeCount = 0;
-   ArrayResize(g_partialCloseDone, 50);
+   ArrayResize(g_partialCloseDone, MAX_PARTIAL_CLOSE_TRACKING);
    ArrayInitialize(g_partialCloseDone, false);
    
    // Create dashboard
@@ -704,21 +709,21 @@ bool PassBuyFilters()
    if(InpTradeDirection == TRADE_SELL_ONLY)
       return false;
    
-   // Trend filter
+   // Trend filter - Allow buys when price is above EMA or within tolerance below
    if(InpUseTrendFilter)
    {
       double price = g_symbolInfo.Bid();
-      // Allow buys in uptrend or ranging (price above or near trend EMA)
-      if(price < g_bufEMATrend[0] * 0.995) // 0.5% tolerance
+      // Allow buys in uptrend or ranging (price above EMA or within tolerance)
+      if(price < g_bufEMATrend[0] * (1.0 - TREND_TOLERANCE_PERCENT))
          return false;
    }
    
-   // RSI filter
+   // RSI filter - Require RSI to be in the lower zone for buy entries
    if(InpUseRSIFilter)
    {
       double rsi = g_bufRSI[0];
-      // For buy at support, RSI should be in oversold zone
-      if(rsi > InpRSIOversold + 20) // RSI not yet oversold enough
+      // For buy at support, RSI should not be too high
+      if(rsi > InpRSIOversold + RSI_FILTER_BUFFER)
          return false;
    }
    
@@ -734,21 +739,21 @@ bool PassSellFilters()
    if(InpTradeDirection == TRADE_BUY_ONLY)
       return false;
    
-   // Trend filter
+   // Trend filter - Allow sells when price is below EMA or within tolerance above
    if(InpUseTrendFilter)
    {
       double price = g_symbolInfo.Bid();
-      // Allow sells in downtrend or ranging (price below or near trend EMA)
-      if(price > g_bufEMATrend[0] * 1.005) // 0.5% tolerance
+      // Allow sells in downtrend or ranging (price below EMA or within tolerance)
+      if(price > g_bufEMATrend[0] * (1.0 + TREND_TOLERANCE_PERCENT))
          return false;
    }
    
-   // RSI filter
+   // RSI filter - Require RSI to be in the upper zone for sell entries
    if(InpUseRSIFilter)
    {
       double rsi = g_bufRSI[0];
-      // For sell at resistance, RSI should be in overbought zone
-      if(rsi < InpRSIOverbought - 20) // RSI not yet overbought enough
+      // For sell at resistance, RSI should not be too low
+      if(rsi < InpRSIOverbought - RSI_FILTER_BUFFER)
          return false;
    }
    
@@ -930,7 +935,7 @@ void ManagePositions()
       }
       
       // Partial close management
-      if(InpUsePartialClose && !g_partialCloseDone[i % 50])
+      if(InpUsePartialClose && !g_partialCloseDone[i % MAX_PARTIAL_CLOSE_TRACKING])
       {
          double partialTrigger = tpDistance * InpPartialRatio;
          
@@ -942,7 +947,7 @@ void ManagePositions()
             if(closeVolume < volume)
             {
                g_trade.PositionClosePartial(ticket, closeVolume);
-               g_partialCloseDone[i % 50] = true;
+               g_partialCloseDone[i % MAX_PARTIAL_CLOSE_TRACKING] = true;
                Print("Partial close: ", closeVolume, " lots at ", profitPoints, " points profit");
             }
          }
