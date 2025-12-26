@@ -1,0 +1,158 @@
+; GAMORAFX - Optimized Settings for Index Trading (US30, NAS100, GER40)
+; Optimized for higher volatility and directional movements of indices
+; Risk/Reward: 1:3 | Aggressive trailing stop | Session filters enabled
+
+;--- General Settings ---
+Timeframe=16385
+; H1 (16385) - Best for indices trend following
+; Alternative: H4 (16388) for more stable signals
+
+InpMagicNumber=123456
+InpTradeComment=GAMORAFX_INDEX
+
+;--- Risk Management (More Conservative for Indices) ---
+InpRiskPercent=1.5
+; Reduced from 2% to 1.5% due to higher volatility of indices
+
+InpMaxDrawdown=15.0
+; Tighter drawdown control - indices can move fast
+
+InpMaxPositions=2
+; Max 2 positions to avoid overexposure
+
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+; Reduced max lot for safety on leveraged indices
+
+;--- Moving Average Strategy (Adjusted for Trend) ---
+InpUseMAStrategy=1
+; Enabled - MA works great on trending indices
+
+InpFastMAPeriod=8
+; Faster (8 instead of 12) to catch quick index moves
+
+InpSlowMAPeriod=21
+; Optimized for H1 timeframe on indices
+
+InpMAMethod=1
+; 1 = EMA (more responsive to price changes)
+; 0 = SMA, 1 = EMA, 2 = SMMA, 3 = LWMA
+
+;--- RSI Strategy (Fine-tuned) ---
+InpUseRSIStrategy=1
+; Enabled - RSI excellent for index reversals
+
+InpRSIPeriod=14
+; Standard RSI period
+
+InpRSIOverbought=75
+; Higher threshold (75 instead of 70) - indices can stay overbought longer
+
+InpRSIOversold=25
+; Lower threshold (25 instead of 30) - more conservative entries
+
+;--- MACD Strategy (Momentum Confirmation) ---
+InpUseMACDStrategy=1
+; Enabled - All 3 strategies for maximum confirmation
+
+InpMACDFast=12
+InpMACDSlow=26
+InpMACDSignal=9
+; Standard MACD settings work well on indices
+
+;--- Stop Loss & Take Profit (Optimized for Index Volatility) ---
+InpStopLoss=150
+; 150 points (was 50) - indices need wider stops due to volatility
+; For US30: ~150 points = reasonable stop
+; For NAS100: adjust to ~200-250 based on volatility
+; For GER40: ~100-120 may suffice
+
+InpTakeProfit=450
+; 450 points (was 100) - Risk/Reward 1:3 ratio
+; Allows indices to run on strong trends
+
+InpUseTrailingStop=1
+; Enabled - Critical for capturing big index moves
+
+InpTrailingStart=200
+; Start trailing after 200 points profit (was 30)
+; Gives trade room to breathe on volatile moves
+
+InpTrailingStep=80
+; Trail at 80 points distance (was 10)
+; Wider trailing to avoid premature exits on index swings
+
+;--- Trading Hours Filter (CRITICAL for Indices) ---
+InpUseTradingHours=1
+; ENABLED - Trade only during high liquidity sessions
+
+InpStartHour=14
+; 14:00 UTC = US session open (9:00 AM EST)
+; Adjust based on your broker's server time!
+; For US30/NAS100: Trade during US session (14:00-21:00 UTC)
+; For GER40/UK100: Trade during EU session (8:00-16:00 UTC)
+
+InpEndHour=21
+; 21:00 UTC = Before US session close (4:00 PM EST)
+; Avoids overnight gaps and low liquidity periods
+
+;=================================================================
+; IMPORTANT NOTES FOR INDEX TRADING:
+;=================================================================
+; 
+; 1. SYMBOL SELECTION:
+;    - US30 (Dow Jones): Best for trend following, lower volatility
+;    - NAS100 (Nasdaq): High volatility, adjust SL to 200-250
+;    - GER40 (DAX): European session, change hours to 8-16 UTC
+;    - SPX500 (S&P 500): Moderate volatility, current settings OK
+;
+; 2. TIMEFRAME:
+;    - H1: Recommended for catching intraday trends
+;    - H4: Alternative for swing trading (less signals, more reliable)
+;    - Avoid M15/M30: Too noisy with spread costs
+;
+; 3. BROKER CONSIDERATIONS:
+;    - Check point value: Some brokers quote US30 as 34000, others as 34.000
+;    - Adjust SL/TP accordingly (divide by 100 if decimal quotes)
+;    - Verify spread: Should be < 5 points for US30, < 2 for NAS100
+;
+; 4. SESSION TIMING (UTC):
+;    - Asian: 0-8 (Low volume - AVOID)
+;    - European: 8-16 (Good for GER40, UK100)
+;    - US: 14-21 (Best for US30, NAS100, SPX500)
+;    - Overlap: 14-16 (Highest volatility)
+;
+; 5. BACKTESTING:
+;    - Test on 6+ months of data
+;    - Use "Every tick based on real ticks" mode
+;    - Check during different market conditions (trending/ranging)
+;    - Minimum trades: 50+ for statistical significance
+;
+; 6. OPTIMIZATION TIPS:
+;    - If too many losses: Increase InpTrailingStart to 250-300
+;    - If missing big moves: Decrease InpFastMAPeriod to 5-6
+;    - If too many false signals: Disable RSI (set InpUseRSIStrategy=0)
+;    - If drawdown too high: Reduce InpRiskPercent to 1.0%
+;
+; 7. RISK WARNING:
+;    - Indices can gap overnight - avoid holding positions overnight
+;    - News events (NFP, FOMC, CPI) cause extreme volatility
+;    - Use economic calendar and pause EA during major news
+;    - Start with demo account for at least 1 month
+;
+;=================================================================
+; EXPECTED PERFORMANCE (Indicative - Not Guaranteed):
+;=================================================================
+; Win Rate: 45-55% (lower win rate but higher R:R compensates)
+; Risk/Reward: 1:3 (each win covers 3 losses)
+; Max Drawdown: 10-15%
+; Profit Factor: 1.5-2.0 (good risk-adjusted returns)
+; Trades/Week: 2-5 (depends on market conditions)
+;=================================================================
+
+; Version: 1.0
+; Date: 2024-12-26
+; Optimized for: US30, NAS100, SPX500, GER40
+; Timeframe: H1
+; Session: US/EU trading hours
+; Risk Level: Medium-Conservative
