@@ -182,7 +182,8 @@ int OnInit()
     InitializeBuffers();
     
     //--- Initialize state
-    g_initialCapital = InpAllocatedCapital;
+    //--- Use actual account equity for drawdown tracking (important for backtesting!)
+    g_initialCapital = g_accountInfo.Equity();
     g_highestEquity = g_initialCapital;
     g_currentDrawdown = 0;
     g_lastBarTime = 0;
@@ -432,7 +433,17 @@ void DetectConsolidation()
     atrLong /= InpATRLongPeriod;
     
     //--- Consolidation: Short-term ATR < Long-term ATR (market is "flat")
-    g_inConsolidation = (atrShort < atrLong);
+    //--- Or we can use a ratio threshold (e.g., short ATR < 1.2 * long ATR)
+    g_inConsolidation = (atrShort < atrLong * 1.5); // More lenient - 1.5x multiplier
+    
+    //--- Debug print (once per day)
+    static datetime lastPrintTime = 0;
+    datetime currentTime = TimeCurrent();
+    if(currentTime - lastPrintTime > 86400)
+    {
+        Print("Consolidation Check: ATRshort=", atrShort, " ATRlong=", atrLong, " InConsol=", g_inConsolidation);
+        lastPrintTime = currentTime;
+    }
     
     //--- Calculate consolidation range (high/low of breakout period)
     g_consolidationHigh = 0;
@@ -454,6 +465,15 @@ void DetectConsolidation()
 int GetBreakoutSignal()
 {
     double close = iClose(_Symbol, InpTimeframe, 1);
+    
+    //--- Debug print (once per day)
+    static datetime lastPrintTime = 0;
+    datetime currentTime = TimeCurrent();
+    if(currentTime - lastPrintTime > 86400)
+    {
+        Print("Breakout Check: Close=", close, " High=", g_consolidationHigh, " Low=", g_consolidationLow);
+        lastPrintTime = currentTime;
+    }
     
     //--- Volume confirmation
     if(InpUseVolumeFilter)

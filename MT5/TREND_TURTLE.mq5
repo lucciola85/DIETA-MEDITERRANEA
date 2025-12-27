@@ -153,7 +153,8 @@ int OnInit()
     InitializeBuffers();
     
     //--- Initialize state
-    g_initialCapital = InpAllocatedCapital;
+    //--- Use actual account equity for drawdown tracking (important for backtesting!)
+    g_initialCapital = g_accountInfo.Equity();
     g_highestEquity = g_initialCapital;
     g_currentDrawdown = 0;
     g_lastBarTime = 0;
@@ -406,6 +407,15 @@ int GetTradeSignal()
     double adx = g_bufADX[1];
     double close = iClose(_Symbol, InpTimeframe, 1);
     
+    //--- Debug print (remove after testing)
+    static datetime lastPrintTime = 0;
+    datetime currentTime = TimeCurrent();
+    if(currentTime - lastPrintTime > 86400) // Print once per day
+    {
+        Print("Signal Check: EMAfast=", emaFast, " EMAslow=", emaSlow, " ADX=", adx, " Close=", close);
+        lastPrintTime = currentTime;
+    }
+    
     //--- ADX filter: Only trade when trend is strong enough
     if(adx < InpADXThreshold)
         return 0;
@@ -431,7 +441,10 @@ int GetTradeSignal()
     if(emaFast > emaSlow && close > emaFast)
     {
         if(!HasPositionType(POSITION_TYPE_BUY))
+        {
+            Print("LONG Signal Generated! EMAfast=", emaFast, " EMAslow=", emaSlow, " Close=", close);
             return 1; // BUY signal
+        }
     }
     
     //--- SHORT conditions (inverse):
@@ -441,7 +454,10 @@ int GetTradeSignal()
     if(emaFast < emaSlow && close < emaFast)
     {
         if(!HasPositionType(POSITION_TYPE_SELL))
+        {
+            Print("SHORT Signal Generated! EMAfast=", emaFast, " EMAslow=", emaSlow, " Close=", close);
             return -1; // SELL signal
+        }
     }
     
     return 0;

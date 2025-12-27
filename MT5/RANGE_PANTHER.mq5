@@ -170,7 +170,8 @@ int OnInit()
     InitializeBuffers();
     
     //--- Initialize state
-    g_initialCapital = InpAllocatedCapital;
+    //--- Use actual account equity for drawdown tracking (important for backtesting!)
+    g_initialCapital = g_accountInfo.Equity();
     g_highestEquity = g_initialCapital;
     g_currentDrawdown = 0;
     g_lastBarTime = 0;
@@ -501,16 +502,28 @@ bool CheckRangeBreak()
 int GetTradeSignal()
 {
     if(g_supportLevel == 0 || g_resistanceLevel == 0)
+    {
+        Print("No S/R levels yet - Support:", g_supportLevel, " Resistance:", g_resistanceLevel);
         return 0;
+    }
     
     double close = iClose(_Symbol, InpTimeframe, 1);
     double rsi = g_bufRSI[1];
     double atr = g_bufATR[1];
     double proximity = atr * InpProximityATR;
     
+    //--- Debug print (once per day)
+    static datetime lastPrintTime = 0;
+    datetime currentTime = TimeCurrent();
+    if(currentTime - lastPrintTime > 86400)
+    {
+        Print("Range Check: S=", g_supportLevel, " R=", g_resistanceLevel, " Close=", close, " RSI=", rsi, " Prox=", proximity);
+        lastPrintTime = currentTime;
+    }
+    
     //--- LONG conditions (at support):
-    // 1. Price near support level (within 0.5 ATR)
-    // 2. RSI is oversold (< 30)
+    // 1. Price near support level (within proximity ATR)
+    // 2. RSI is oversold
     // 3. No existing position
     if(close <= g_supportLevel + proximity && close >= g_supportLevel - proximity)
     {
@@ -525,8 +538,8 @@ int GetTradeSignal()
     }
     
     //--- SHORT conditions (at resistance):
-    // 1. Price near resistance level (within 0.5 ATR)
-    // 2. RSI is overbought (> 70)
+    // 1. Price near resistance level (within proximity ATR)
+    // 2. RSI is overbought
     // 3. No existing position
     if(close >= g_resistanceLevel - proximity && close <= g_resistanceLevel + proximity)
     {
