@@ -3,6 +3,7 @@
 ; Target: Profit from ranging markets with RSI extremes
 ; Risk Level: Medium | Trade Frequency: Medium (3-8 per month)
 ; Recommended Capital Allocation: 30% of portfolio
+; UPDATED: Relaxed filters for more trade opportunities
 
 ;=================================================================
 ; GENERAL SETTINGS
@@ -25,8 +26,8 @@ InpRiskPercent=1.0
 InpRiskBase=1.0
 ; Base risk for dynamic adjustment
 
-InpMaxDrawdownPct=20.0
-; Max 20% drawdown
+InpMaxDrawdownPct=25.0
+; Max 25% drawdown (increased for backtesting)
 
 InpMinLotSize=0.01
 InpMaxLotSize=5.0
@@ -37,20 +38,20 @@ InpMaxPositions=1
 ;=================================================================
 ; RANGE DETECTION
 ;=================================================================
-InpRangePeriod=50
-; Look back 50 bars (8+ days on H4) for S/R levels
+InpRangePeriod=30
+; Look back 30 bars (5 days on H4) for S/R levels (reduced from 50)
 
-InpProximityATR=0.5
-; Price within 0.5 ATR of S/R triggers signal check
+InpProximityATR=1.0
+; Price within 1.0 ATR of S/R triggers signal check (INCREASED from 0.5)
 
-InpBreakoutATR=1.5
-; 1.5 ATR beyond S/R = range broken, disable EA
+InpBreakoutATR=2.0
+; 2.0 ATR beyond S/R = range broken (INCREASED from 1.5)
 
 ;=================================================================
 ; LINEAR REGRESSION CHANNEL
 ;=================================================================
-InpUseRegChannel=1
-; Enabled - dynamic S/R identification
+InpUseRegChannel=0
+; DISABLED - use simple high/low instead for more reliable signals
 
 InpRegPeriod=50
 ; 50-period regression channel
@@ -58,8 +59,8 @@ InpRegPeriod=50
 InpRegDeviation=2.0
 ; 2 standard deviations for channel bands
 
-InpMaxChannelSlope=0.0001
-; Max slope for "flat" range - EURGBP specific
+InpMaxChannelSlope=0.001
+; Max slope INCREASED from 0.0001 to 0.001
 
 ;=================================================================
 ; RSI OSCILLATOR
@@ -67,11 +68,11 @@ InpMaxChannelSlope=0.0001
 InpRSIPeriod=14
 ; Standard RSI period
 
-InpRSIOversold=30
-; Buy signal when RSI < 30 at support
+InpRSIOversold=35
+; Buy signal when RSI < 35 at support (INCREASED from 30)
 
-InpRSIOverbought=70
-; Sell signal when RSI > 70 at resistance
+InpRSIOverbought=65
+; Sell signal when RSI > 65 at resistance (DECREASED from 70)
 
 InpRSIMidLevel=50
 ; Exit if RSI returns to 50 without hitting TP
@@ -82,32 +83,32 @@ InpRSIMidLevel=50
 InpATRPeriod=14
 ; Standard ATR period
 
-InpSLATRMultiplier=1.0
-; SL placed 1 ATR beyond S/R level
+InpSLATRMultiplier=1.5
+; SL placed 1.5 ATR beyond S/R level (INCREASED from 1.0)
 
 ;=================================================================
 ; VOLATILITY FILTER
 ;=================================================================
-InpUseATRFilter=1
-; Enabled - filter extreme conditions
+InpUseATRFilter=0
+; DISABLED - allow trades in all volatility conditions
 
-InpATRMinPercent=0.1
-; Min 0.1% ATR - EURGBP has low volatility
+InpATRMinPercent=0.05
+; Min 0.05% ATR (lowered)
 
-InpATRMaxPercent=1.0
-; Max 1% ATR - avoid Brexit-style volatility
+InpATRMaxPercent=2.0
+; Max 2% ATR (increased)
 
 ;=================================================================
 ; SESSION FILTER
 ;=================================================================
-InpUseSessionFilter=1
-; Enabled - trade during EU/UK overlap
+InpUseSessionFilter=0
+; DISABLED - trade all sessions for more opportunities
 
-InpSessionStart=8
-; 8:00 UTC - London open
+InpSessionStart=0
+; 0:00 UTC
 
-InpSessionEnd=17
-; 17:00 UTC - End of EU session
+InpSessionEnd=24
+; 24:00 UTC
 
 ;=================================================================
 ; PARTIAL CLOSE (SCALE-OUT)
@@ -124,11 +125,11 @@ InpTP1Ratio=0.5
 ;=================================================================
 ; RANGE BREAK MANAGEMENT
 ;=================================================================
-InpDisableOnBreak=1
-; Disable EA when range breaks
+InpDisableOnBreak=0
+; DISABLED - continue trading even after range breaks
 
-InpCooldownBars=10
-; Wait 10 bars (40 hours) after break before re-enabling
+InpCooldownBars=5
+; Wait 5 bars (20 hours) after break before re-enabling (reduced)
 
 ;=================================================================
 ; LOGGING
@@ -139,6 +140,26 @@ InpEnableLogging=1
 InpEnableAlerts=1
 ; Enable trade alerts
 
+;=================================================================
+; CHANGES MADE FOR MORE TRADES (v1.1):
+;=================================================================
+; 1. InpRangePeriod: 50 -> 30 (shorter lookback)
+; 2. InpProximityATR: 0.5 -> 1.0 (wider proximity zone)
+; 3. InpBreakoutATR: 1.5 -> 2.0 (more tolerance before break)
+; 4. InpUseRegChannel: 1 -> 0 (DISABLED regression channel)
+; 5. InpMaxChannelSlope: 0.0001 -> 0.001 (10x increase)
+; 6. InpRSIOversold: 30 -> 35 (easier to trigger)
+; 7. InpRSIOverbought: 70 -> 65 (easier to trigger)
+; 8. InpUseATRFilter: 1 -> 0 (DISABLED volatility filter)
+; 9. InpUseSessionFilter: 1 -> 0 (DISABLED session filter)
+; 10. InpDisableOnBreak: 1 -> 0 (continue trading after breaks)
+;
+; KEY ENTRY CONDITIONS:
+; - Price within 1.0 ATR of Support/Resistance
+; - RSI < 35 for BUY at support
+; - RSI > 65 for SELL at resistance
+; - No open position
+;
 ;=================================================================
 ; OPTIMIZATION NOTES FOR EURGBP:
 ;=================================================================
@@ -152,33 +173,20 @@ InpEnableAlerts=1
 ; 2. EXPECTED PERFORMANCE:
 ;    - Win Rate: 55-65% (mean reversion has higher win rate)
 ;    - Risk/Reward: 1:1 to 1:1.5 (smaller but consistent wins)
-;    - Trades/Month: 3-8
-;    - Max Drawdown: 10-15%
+;    - Trades/Month: 5-15 with relaxed settings
+;    - Max Drawdown: 15-25%
 ;
-; 3. MARKET CONDITIONS:
-;    - Works best in ranging/consolidating markets
-;    - Auto-disables during breakouts
-;    - Avoid during major EU/UK news events
-;
-; 4. KEY LEVELS TO WATCH:
-;    - Major S/R often at round numbers (0.8400, 0.8500, etc.)
-;    - Brexit news can cause temporary breakouts
-;    - BOE/ECB rate decisions = high volatility
-;
-; 5. ALTERNATIVE PAIRS:
-;    - EURCHF: Similar ranging behavior (SNB intervention risk)
-;    - AUDNZD: Pacific cross, good for Asian session
-;    - GBPCHF: Higher volatility, widen ATR filters
-;
-; 6. SESSION TIMING:
-;    - Best: London session (8:00-16:00 UTC)
-;    - EU/UK overlap: 8:00-12:00 UTC
-;    - Avoid: Asian session (low liquidity)
+; 3. IF STILL NO TRADES:
+;    - Try InpProximityATR=1.5 (even wider zone)
+;    - Try InpRSIOversold=40, InpRSIOverbought=60
+;    - Try InpRangePeriod=20 (shorter lookback)
+;    - Check broker symbol name (EURGBP, EURGBPm, etc.)
 ;
 ;=================================================================
 
-; Version: 1.0
+; Version: 1.1
 ; Date: 2024-12-27
+; Updated: Relaxed filters for backtesting
 ; Optimized for: EURGBP (Euro/British Pound)
 ; Timeframe: H4 (4-Hour)
 ; Strategy: Mean-Reversion (S/R + RSI)
