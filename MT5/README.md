@@ -1,3 +1,227 @@
+# MT5 Expert Advisors Portfolio
+
+## Overview
+
+This directory contains a professional portfolio of MetaTrader 5 Expert Advisors designed for diversified automated trading. The portfolio includes three specialized EAs with different strategies, plus a Portfolio Manager for centralized risk control.
+
+---
+
+# EA Portfolio System
+
+## Portfolio Composition
+
+| EA Name | Strategy | Symbol | Timeframe | Capital Allocation |
+|---------|----------|--------|-----------|-------------------|
+| **TREND_TURTLE** | Trend-Following | US30 (Dow Jones) | D1 | 40% |
+| **RANGE_PANTHER** | Mean-Reversion | EURGBP | H4 | 30% |
+| **MOMENTUM_SCALPER** | Breakout | XAUUSD (Gold) | H1 | 30% |
+| **PORTFOLIO_MANAGER** | Risk Control | All | - | Oversight |
+
+## Correlation Analysis
+
+The portfolio is designed with low correlation between assets:
+- **US30 & XAUUSD**: Variable correlation, often decorrelated
+- **US30 & EURGBP**: No direct correlation (US index vs EU cross)
+- **EURGBP & XAUUSD**: No significant correlation
+
+---
+
+# EA 1: TREND_TURTLE
+
+## Strategy Overview
+Trend-following system for capturing macro trends on the Dow Jones Industrial Average (US30).
+
+### Entry Conditions (LONG)
+1. EMA(50) above EMA(200) on D1
+2. Candle closes above EMA(50)
+3. ADX(14) > 25 (trend quality filter)
+4. Weekly EMA filter (optional higher timeframe confirmation)
+
+### Entry Conditions (SHORT)
+- Inverse of LONG conditions
+
+### Exit Strategy
+- **Initial Stop Loss**: 2.5 × ATR(14) from entry
+- **Take Profit**: None (exit via trailing stop)
+- **Trailing Stop**: Moves to EMA(50) after 1 ATR profit
+
+### Special Features
+- ATR volatility filter (avoids dead and hysteric markets)
+- Dynamic money management (reduces risk during drawdown)
+- Optional pyramiding (add to winning positions)
+- CSV logging for all trades
+
+---
+
+# EA 2: RANGE_PANTHER
+
+## Strategy Overview
+Mean-reversion system for trading ranges on EURGBP, a historically ranging forex pair.
+
+### Entry Conditions (LONG)
+1. Price within Support/Resistance range
+2. Price near support (within 0.5 ATR)
+3. RSI(14) < 30 (oversold)
+4. Linear regression channel is flat (optional)
+
+### Entry Conditions (SHORT)
+1. Price near resistance (within 0.5 ATR)
+2. RSI(14) > 70 (overbought)
+
+### Exit Strategy
+- **Take Profit**: Opposite range level
+- **Stop Loss**: Beyond S/R level by 1 ATR
+- **Partial Close**: 50% at mid-range, move SL to breakeven
+- **Early Exit**: If RSI returns to 50 without hitting TP
+
+### Special Features
+- Dynamic S/R via linear regression channel
+- Auto-disables when range breaks (1.5 ATR beyond levels)
+- Scale-out management for locked profits
+- Session filter for London trading hours
+
+---
+
+# EA 3: MOMENTUM_SCALPER
+
+## Strategy Overview
+Breakout system for capturing momentum moves on Gold (XAUUSD).
+
+### Entry Conditions (LONG BREAKOUT)
+1. **Consolidation Phase**: ATR(14) of last 10 periods < 50-period average
+2. **Breakout**: Price closes above 20-period high
+3. **Volume Confirmation**: Breakout candle volume > 1.5× average
+4. **MACD Confirmation**: Bullish crossover
+
+### Entry Conditions (SHORT BREAKOUT)
+- Inverse conditions
+
+### Exit Strategy
+- **Stop Loss**: Below consolidation low
+- **Take Profit**: 1:2 or 1:3 risk/reward ratio
+- **Partial Close**: 50% at 1:1, move to breakeven
+- **Extended TP**: Remaining position targets 1:3
+
+### Special Features
+- Pullback entry option (wait for retest of breakout level)
+- Candlestick pattern recognition (hammer, engulfing)
+- Breakeven management
+- Multi-timeframe pullback detection
+
+---
+
+# EA 4: PORTFOLIO_MANAGER
+
+## Overview
+Master controller that oversees all portfolio EAs with centralized risk management.
+
+### Key Functions
+
+#### Circuit Breaker
+- **Trigger**: Portfolio drawdown exceeds 12%
+- **Action**: Halts all trading, optionally closes all positions
+- **Cooldown**: Resumes after configurable pause period
+
+#### Correlation Monitoring
+- Calculates real-time correlation between portfolio symbols
+- Alerts when correlation exceeds threshold (0.7)
+- Can block correlated trades (optional)
+
+#### Capital Rebalancing
+- **Monthly**: Rebalances on specified day
+- **Weekly**: Rebalances every Monday
+- **On Drift**: Rebalances when allocation drifts > 10%
+
+#### Dashboard
+Visual display showing:
+- Portfolio equity and drawdown
+- Individual EA performance
+- Current allocation vs. target
+- Correlation matrix
+- Circuit breaker status
+
+---
+
+# Common Features (All EAs)
+
+## Money Management
+
+### Position Sizing Formula
+```
+Lot Size = (Allocated_Capital × Risk%) / (SL_Distance × Value_Per_Pip)
+```
+
+### Dynamic Risk Adjustment
+```
+Current_Risk = Base_Risk × (1 - Current_DD / Max_DD)
+```
+Reduces risk proportionally during drawdowns.
+
+## Volatility Filter
+All EAs filter trades based on ATR:
+- **Min ATR**: Avoids low-volatility (holiday) markets
+- **Max ATR**: Avoids extreme volatility events
+
+## Logging
+- CSV file logging for all trades
+- Timestamps, prices, SL/TP, reasons
+- Critical event alerts
+
+---
+
+# Installation
+
+1. Copy all `.mq5` files to your MT5 `Experts` folder:
+   ```
+   [MT5 Data Folder]/MQL5/Experts/
+   ```
+
+2. Compile each EA in MetaEditor (F7)
+
+3. Attach EAs to appropriate charts:
+   - TREND_TURTLE → US30, D1
+   - RANGE_PANTHER → EURGBP, H4
+   - MOMENTUM_SCALPER → XAUUSD, H1
+   - PORTFOLIO_MANAGER → Any chart
+
+4. Configure capital allocation in each EA to match portfolio targets
+
+---
+
+# Configuration Guide
+
+## Capital Allocation Example
+With €100,000 total capital:
+
+| EA | Allocation | Capital |
+|----|------------|---------|
+| TREND_TURTLE | 40% | €40,000 |
+| RANGE_PANTHER | 30% | €30,000 |
+| MOMENTUM_SCALPER | 30% | €30,000 |
+
+## Risk Parameters
+- **Risk per Trade**: 1% recommended
+- **Max Drawdown per EA**: 20%
+- **Portfolio Circuit Breaker**: 12%
+
+---
+
+# Backtesting Recommendations
+
+1. Use "Every tick based on real ticks" for accuracy
+2. Test minimum 2-3 years of data
+3. Include spreads and commissions
+4. Test each EA individually first
+5. Then test portfolio correlation
+
+---
+
+# Risk Warning
+
+⚠️ **DISCLAIMER**: Trading financial instruments involves substantial risk. Past performance is not indicative of future results. These EAs are provided "as is" without warranty. Only trade with capital you can afford to lose.
+
+---
+
 # GAMORAFX - MT5 Expert Advisor
 
 ## Overview
