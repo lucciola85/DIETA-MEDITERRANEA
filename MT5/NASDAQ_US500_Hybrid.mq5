@@ -417,27 +417,13 @@ int GetTradeSignal()
 {
    int signal = 0;
    
-   switch(g_currentRegime)
-   {
-      case REGIME_STRONG_TREND:
-      case REGIME_WEAK_TREND:
-         if(InpUseTrendStrategy)
-            signal = GetTrendSignal();
-         break;
-         
-      case REGIME_BREAKOUT:
-         if(InpUseBreakoutStrategy)
-            signal = GetBreakoutSignal();
-         else if(InpUseTrendStrategy)
-            signal = GetTrendSignal();
-         break;
-         
-      case REGIME_CONSOLIDATION:
-         // In consolidation, wait for breakout or trend confirmation
-         if(InpUseBreakoutStrategy)
-            signal = GetBreakoutSignal();
-         break;
-   }
+   // Try trend signal first in any regime
+   if(InpUseTrendStrategy)
+      signal = GetTrendSignal();
+   
+   // If no trend signal, try breakout signal
+   if(signal == 0 && InpUseBreakoutStrategy)
+      signal = GetBreakoutSignal();
    
    // Apply direction filter
    if(InpTradeDirection == TRADE_BUY_ONLY && signal < 0)
@@ -461,19 +447,32 @@ int GetTrendSignal()
    bool macdBullish = g_bufMACDMain[0] > g_bufMACDSignal[0];
    bool macdBearish = g_bufMACDMain[0] < g_bufMACDSignal[0];
    
+   // Crossover detection (exact crossover OR already crossed and aligned)
    bool bullishCrossover = g_bufEMAFast[1] <= g_bufEMASlow[1] && fastAboveSlow;
    bool bearishCrossover = g_bufEMAFast[1] >= g_bufEMASlow[1] && fastBelowSlow;
    
-   // ADX direction confirmation
+   // Trend continuation (EMAs already aligned)
+   bool bullishTrend = fastAboveSlow && priceAboveFilter;
+   bool bearishTrend = fastBelowSlow && priceBelowFilter;
+   
+   // ADX direction confirmation (optional - check if ADX is reasonable)
    bool adxBullish = g_bufADXPlus[0] > g_bufADXMinus[0];
    bool adxBearish = g_bufADXMinus[0] > g_bufADXPlus[0];
    
-   // Buy signal
-   if(bullishCrossover && priceAboveFilter && macdBullish && adxBullish)
+   // Buy signal - crossover with confirmations OR strong trend continuation
+   if(bullishCrossover && macdBullish && adxBullish)
       return 1;
    
-   // Sell signal
-   if(bearishCrossover && priceBelowFilter && macdBearish && adxBearish)
+   // Alternative buy: Strong trend continuation without crossover
+   if(bullishTrend && macdBullish && adxBullish && g_bufADX[0] >= InpADXTrendLevel)
+      return 1;
+   
+   // Sell signal - crossover with confirmations OR strong trend continuation
+   if(bearishCrossover && macdBearish && adxBearish)
+      return -1;
+   
+   // Alternative sell: Strong trend continuation without crossover
+   if(bearishTrend && macdBearish && adxBearish && g_bufADX[0] >= InpADXTrendLevel)
       return -1;
    
    return 0;
@@ -501,7 +500,7 @@ int GetBreakoutSignal()
    
    double breakoutThreshold = atr * InpATRBreakoutMult;
    
-   // Volume confirmation
+   // Volume confirmation (if enabled)
    bool volumeConfirmed = true;
    if(InpConfirmVolume)
    {
@@ -513,18 +512,16 @@ int GetBreakoutSignal()
       volumeConfirmed = (currentVol > avgVol * InpVolumeMult);
    }
    
-   // Bullish breakout
+   // Bullish breakout - removed ADX rising requirement
    if(price > highestHigh + breakoutThreshold && volumeConfirmed)
    {
-      if(g_bufADX[0] > g_bufADX[1])
-         return 1;
+      return 1;
    }
    
-   // Bearish breakout
+   // Bearish breakout - removed ADX rising requirement
    if(price < lowestLow - breakoutThreshold && volumeConfirmed)
    {
-      if(g_bufADX[0] > g_bufADX[1])
-         return -1;
+      return -1;
    }
    
    return 0;
