@@ -910,7 +910,7 @@ double OnTester()
 {
     double profit = TesterStatistics(STAT_PROFIT);
     double drawdown = TesterStatistics(STAT_EQUITY_DD_RELATIVE);
-    double trades = TesterStatistics(STAT_TRADES);
+    int trades = (int)TesterStatistics(STAT_TRADES);
     double profitFactor = TesterStatistics(STAT_PROFIT_FACTOR);
     
     if(drawdown > 0 && trades >= 20)
