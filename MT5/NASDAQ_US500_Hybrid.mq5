@@ -441,38 +441,17 @@ int GetTrendSignal()
 {
    bool fastAboveSlow = g_bufEMAFast[0] > g_bufEMASlow[0];
    bool fastBelowSlow = g_bufEMAFast[0] < g_bufEMASlow[0];
-   bool priceAboveFilter = g_symbolInfo.Bid() > g_bufEMAFilter[0];
-   bool priceBelowFilter = g_symbolInfo.Bid() < g_bufEMAFilter[0];
    
-   bool macdBullish = g_bufMACDMain[0] > g_bufMACDSignal[0];
-   bool macdBearish = g_bufMACDMain[0] < g_bufMACDSignal[0];
-   
-   // Crossover detection (exact crossover OR already crossed and aligned)
+   // Crossover detection
    bool bullishCrossover = g_bufEMAFast[1] <= g_bufEMASlow[1] && fastAboveSlow;
    bool bearishCrossover = g_bufEMAFast[1] >= g_bufEMASlow[1] && fastBelowSlow;
    
-   // Trend continuation (EMAs already aligned)
-   bool bullishTrend = fastAboveSlow && priceAboveFilter;
-   bool bearishTrend = fastBelowSlow && priceBelowFilter;
-   
-   // ADX direction confirmation (optional - check if ADX is reasonable)
-   bool adxBullish = g_bufADXPlus[0] > g_bufADXMinus[0];
-   bool adxBearish = g_bufADXMinus[0] > g_bufADXPlus[0];
-   
-   // Buy signal - crossover with confirmations OR strong trend continuation
-   if(bullishCrossover && macdBullish && adxBullish)
+   // SIMPLE BUY: Just EMA crossover - no other confirmations needed
+   if(bullishCrossover)
       return 1;
    
-   // Alternative buy: Strong trend continuation without crossover
-   if(bullishTrend && macdBullish && adxBullish && g_bufADX[0] >= InpADXTrendLevel)
-      return 1;
-   
-   // Sell signal - crossover with confirmations OR strong trend continuation
-   if(bearishCrossover && macdBearish && adxBearish)
-      return -1;
-   
-   // Alternative sell: Strong trend continuation without crossover
-   if(bearishTrend && macdBearish && adxBearish && g_bufADX[0] >= InpADXTrendLevel)
+   // SIMPLE SELL: Just EMA crossover - no other confirmations needed  
+   if(bearishCrossover)
       return -1;
    
    return 0;
