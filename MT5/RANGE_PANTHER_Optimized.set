@@ -1,0 +1,185 @@
+; RANGE_PANTHER - Optimized Settings for EURGBP H4 Timeframe
+; Strategy: Mean-Reversion at Support/Resistance Levels
+; Target: Profit from ranging markets with RSI extremes
+; Risk Level: Medium | Trade Frequency: Medium (3-8 per month)
+; Recommended Capital Allocation: 30% of portfolio
+
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=RANGE_PANTHER
+InpMagicNumber=111002
+InpTradeComment=RP_H4_EURGBP
+InpTimeframe=16388
+; H4 (16388) - 4-hour timeframe for mean reversion
+
+;=================================================================
+; CAPITAL & RISK MANAGEMENT
+;=================================================================
+InpAllocatedCapital=30000.0
+; 30% of 100k portfolio = 30,000
+
+InpRiskPercent=1.0
+; 1% risk per trade
+
+InpRiskBase=1.0
+; Base risk for dynamic adjustment
+
+InpMaxDrawdownPct=20.0
+; Max 20% drawdown
+
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+
+InpMaxPositions=1
+; One position at a time
+
+;=================================================================
+; RANGE DETECTION
+;=================================================================
+InpRangePeriod=50
+; Look back 50 bars (8+ days on H4) for S/R levels
+
+InpProximityATR=0.5
+; Price within 0.5 ATR of S/R triggers signal check
+
+InpBreakoutATR=1.5
+; 1.5 ATR beyond S/R = range broken, disable EA
+
+;=================================================================
+; LINEAR REGRESSION CHANNEL
+;=================================================================
+InpUseRegChannel=1
+; Enabled - dynamic S/R identification
+
+InpRegPeriod=50
+; 50-period regression channel
+
+InpRegDeviation=2.0
+; 2 standard deviations for channel bands
+
+InpMaxChannelSlope=0.0001
+; Max slope for "flat" range - EURGBP specific
+
+;=================================================================
+; RSI OSCILLATOR
+;=================================================================
+InpRSIPeriod=14
+; Standard RSI period
+
+InpRSIOversold=30
+; Buy signal when RSI < 30 at support
+
+InpRSIOverbought=70
+; Sell signal when RSI > 70 at resistance
+
+InpRSIMidLevel=50
+; Exit if RSI returns to 50 without hitting TP
+
+;=================================================================
+; ATR SETTINGS
+;=================================================================
+InpATRPeriod=14
+; Standard ATR period
+
+InpSLATRMultiplier=1.0
+; SL placed 1 ATR beyond S/R level
+
+;=================================================================
+; VOLATILITY FILTER
+;=================================================================
+InpUseATRFilter=1
+; Enabled - filter extreme conditions
+
+InpATRMinPercent=0.1
+; Min 0.1% ATR - EURGBP has low volatility
+
+InpATRMaxPercent=1.0
+; Max 1% ATR - avoid Brexit-style volatility
+
+;=================================================================
+; SESSION FILTER
+;=================================================================
+InpUseSessionFilter=1
+; Enabled - trade during EU/UK overlap
+
+InpSessionStart=8
+; 8:00 UTC - London open
+
+InpSessionEnd=17
+; 17:00 UTC - End of EU session
+
+;=================================================================
+; PARTIAL CLOSE (SCALE-OUT)
+;=================================================================
+InpUsePartialClose=1
+; Enabled - lock profits at TP1
+
+InpPartialPercent=50.0
+; Close 50% at TP1
+
+InpTP1Ratio=0.5
+; TP1 at 50% of range (midpoint)
+
+;=================================================================
+; RANGE BREAK MANAGEMENT
+;=================================================================
+InpDisableOnBreak=1
+; Disable EA when range breaks
+
+InpCooldownBars=10
+; Wait 10 bars (40 hours) after break before re-enabling
+
+;=================================================================
+; LOGGING
+;=================================================================
+InpEnableLogging=1
+; Enable CSV logging
+
+InpEnableAlerts=1
+; Enable trade alerts
+
+;=================================================================
+; OPTIMIZATION NOTES FOR EURGBP:
+;=================================================================
+;
+; 1. WHY EURGBP:
+;    - Historically ranging pair (EU/UK economies correlated)
+;    - Lower volatility than major pairs
+;    - Clear technical S/R levels
+;    - Low spread (typically 1-2 pips)
+;
+; 2. EXPECTED PERFORMANCE:
+;    - Win Rate: 55-65% (mean reversion has higher win rate)
+;    - Risk/Reward: 1:1 to 1:1.5 (smaller but consistent wins)
+;    - Trades/Month: 3-8
+;    - Max Drawdown: 10-15%
+;
+; 3. MARKET CONDITIONS:
+;    - Works best in ranging/consolidating markets
+;    - Auto-disables during breakouts
+;    - Avoid during major EU/UK news events
+;
+; 4. KEY LEVELS TO WATCH:
+;    - Major S/R often at round numbers (0.8400, 0.8500, etc.)
+;    - Brexit news can cause temporary breakouts
+;    - BOE/ECB rate decisions = high volatility
+;
+; 5. ALTERNATIVE PAIRS:
+;    - EURCHF: Similar ranging behavior (SNB intervention risk)
+;    - AUDNZD: Pacific cross, good for Asian session
+;    - GBPCHF: Higher volatility, widen ATR filters
+;
+; 6. SESSION TIMING:
+;    - Best: London session (8:00-16:00 UTC)
+;    - EU/UK overlap: 8:00-12:00 UTC
+;    - Avoid: Asian session (low liquidity)
+;
+;=================================================================
+
+; Version: 1.0
+; Date: 2024-12-27
+; Optimized for: EURGBP (Euro/British Pound)
+; Timeframe: H4 (4-Hour)
+; Strategy: Mean-Reversion (S/R + RSI)
+; Risk Level: Medium

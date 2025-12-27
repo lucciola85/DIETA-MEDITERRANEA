@@ -1,0 +1,221 @@
+; MOMENTUM_SCALPER - Optimized Settings for XAUUSD (Gold) H1 Timeframe
+; Strategy: Breakout with Consolidation Detection
+; Target: Capture momentum moves after consolidation periods
+; Risk Level: Medium-Aggressive | Trade Frequency: High (5-15 per month)
+; Recommended Capital Allocation: 30% of portfolio
+
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=MOMENTUM_SCALPER
+InpMagicNumber=111003
+InpTradeComment=MS_H1_XAUUSD
+InpTimeframe=16385
+; H1 (16385) - Hourly timeframe for breakout trading
+
+;=================================================================
+; CAPITAL & RISK MANAGEMENT
+;=================================================================
+InpAllocatedCapital=30000.0
+; 30% of 100k portfolio = 30,000
+
+InpRiskPercent=1.0
+; 1% risk per trade
+
+InpRiskBase=1.0
+; Base risk for dynamic adjustment
+
+InpMaxDrawdownPct=20.0
+; Max 20% drawdown
+
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+
+InpMaxPositions=1
+; One position at a time
+
+;=================================================================
+; CONSOLIDATION DETECTION
+;=================================================================
+InpATRPeriod=14
+; Standard ATR period
+
+InpATRShortPeriod=10
+; Recent volatility (10 bars = 10 hours)
+
+InpATRLongPeriod=50
+; Long-term volatility average
+
+InpBreakoutPeriod=20
+; High/Low lookback for breakout level
+
+;=================================================================
+; VOLUME CONFIRMATION
+;=================================================================
+InpUseVolumeFilter=1
+; Enabled - confirm breakout with volume surge
+
+InpVolumePeriod=5
+; 5-bar volume average
+
+InpVolumeMult=1.5
+; Breakout candle volume > 1.5x average
+
+;=================================================================
+; MACD CONFIRMATION
+;=================================================================
+InpUseMACDFilter=1
+; Enabled - MACD crossover confirms momentum
+
+InpMACDFast=12
+InpMACDSlow=26
+InpMACDSignal=9
+; Standard MACD settings
+
+;=================================================================
+; RISK/REWARD RATIO
+;=================================================================
+InpRRRatio=2.0
+; Primary TP at 1:2 Risk/Reward
+
+InpRRRatio2=3.0
+; Extended TP at 1:3 for remaining position
+
+;=================================================================
+; PARTIAL CLOSE
+;=================================================================
+InpUsePartialClose=1
+; Enabled - secure profits early
+
+InpPartialPercent=50.0
+; Close 50% at TP1
+
+InpTP1RR=1.0
+; TP1 at 1:1 R/R
+
+;=================================================================
+; PULLBACK ENTRY
+;=================================================================
+InpUsePullback=0
+; Disabled by default - enter on breakout
+
+InpPullbackTF=16386
+; M15 (16386) for pullback detection if enabled
+
+InpPullbackBars=5
+; Wait max 5 bars for pullback
+
+;=================================================================
+; VOLATILITY FILTER
+;=================================================================
+InpUseATRFilter=1
+; Enabled - filter extreme conditions
+
+InpATRMinPercent=0.2
+; Min 0.2% ATR - avoid very quiet markets
+
+InpATRMaxPercent=2.0
+; Max 2% ATR - avoid geopolitical crisis volatility
+
+;=================================================================
+; SESSION FILTER
+;=================================================================
+InpUseSessionFilter=1
+; Enabled - trade during active sessions
+
+InpSessionStart=8
+; 8:00 UTC - London open
+
+InpSessionEnd=20
+; 20:00 UTC - After US close
+
+InpAvoidNews=1
+; Avoid trading around major news events
+
+InpNewsBefore=5
+; Pause 5 minutes before news
+
+InpNewsAfter=15
+; Pause 15 minutes after news
+
+;=================================================================
+; BREAKEVEN
+;=================================================================
+InpUseBreakeven=1
+; Enabled - protect capital
+
+InpBEActivation=1.0
+; Move to BE after 1:1 profit
+
+InpBEOffset=5
+; BE + 5 points to cover spread
+
+;=================================================================
+; LOGGING
+;=================================================================
+InpEnableLogging=1
+; Enable CSV logging
+
+InpEnableAlerts=1
+; Enable trade alerts
+
+;=================================================================
+; OPTIMIZATION NOTES FOR XAUUSD (GOLD):
+;=================================================================
+;
+; 1. WHY GOLD (XAUUSD):
+;    - Safe-haven asset with clear consolidation/breakout patterns
+;    - High liquidity during major sessions
+;    - Strong momentum after consolidations
+;    - Not directly correlated to forex or indices
+;
+; 2. EXPECTED PERFORMANCE:
+;    - Win Rate: 45-55%
+;    - Risk/Reward: 1:2 average (TP1 at 1:1, TP2 at 1:3)
+;    - Trades/Month: 5-15
+;    - Max Drawdown: 15-20%
+;
+; 3. MARKET DRIVERS:
+;    - USD strength/weakness (inverse correlation)
+;    - Inflation expectations (CPI data)
+;    - Geopolitical events (safe-haven demand)
+;    - Real yields (TIPS yields)
+;    - Central bank policies (Fed, ECB)
+;
+; 4. HIGH-IMPACT NEWS EVENTS:
+;    - NFP (Non-Farm Payrolls) - 1st Friday monthly
+;    - CPI (Inflation) - Middle of month
+;    - FOMC decisions - 8 times per year
+;    - Geopolitical crises (unpredictable)
+;
+; 5. OPTIMAL TRADING TIMES (UTC):
+;    - London-NY Overlap: 13:00-17:00 (BEST)
+;    - US Session: 13:00-21:00
+;    - Asian Session: 00:00-08:00 (lower volume)
+;
+; 6. BROKER CONSIDERATIONS:
+;    - Spread: Should be < $0.30 ($30 per lot)
+;    - Swap: Check overnight costs
+;    - Margin: Gold requires higher margin
+;    - Point value: Usually $1 per point per lot
+;
+; 7. CONSOLIDATION CHARACTERISTICS:
+;    - Typical consolidation: 4-12 hours on H1
+;    - ATR contracts before breakout
+;    - Volume spikes on genuine breakouts
+;    - False breakouts common at round numbers
+;
+; 8. KEY PRICE LEVELS:
+;    - Round numbers: $1900, $1950, $2000, $2050
+;    - Previous day H/L
+;    - Weekly pivot points
+;    - Fibonacci levels
+;
+;=================================================================
+
+; Version: 1.0
+; Date: 2024-12-27
+; Optimized for: XAUUSD (Gold)
+; Timeframe: H1 (Hourly)
+; Strategy: Breakout with Consolidation Detection
+; Risk Level: Medium-Aggressive

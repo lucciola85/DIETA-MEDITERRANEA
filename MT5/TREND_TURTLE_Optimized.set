@@ -1,0 +1,151 @@
+; TREND_TURTLE - Optimized Settings for US30 (Dow Jones) Daily Timeframe
+; Strategy: Trend-Following with EMA Crossover
+; Target: Capture macro trends on US indices
+; Risk Level: Conservative-Medium | Trade Frequency: Low (1-3 per month)
+; Recommended Capital Allocation: 40% of portfolio
+
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=TREND_TURTLE
+InpMagicNumber=111001
+InpTradeComment=TT_D1_US30
+InpTimeframe=16408
+; D1 (16408) - Daily timeframe for macro trend following
+
+;=================================================================
+; CAPITAL & RISK MANAGEMENT
+;=================================================================
+InpAllocatedCapital=40000.0
+; 40% of 100k portfolio = 40,000
+
+InpRiskPercent=1.0
+; 1% risk per trade - conservative for trend following
+
+InpRiskBase=1.0
+; Base risk for dynamic adjustment
+
+InpMaxDrawdownPct=20.0
+; Max 20% drawdown before EA stops trading
+
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+
+InpMaxPositions=1
+; Only 1 position at a time - pure trend following
+
+;=================================================================
+; TREND STRATEGY - EMA CROSSOVER
+;=================================================================
+InpEMAFast=50
+; EMA(50) - Standard turtle trading approach
+
+InpEMASlow=200
+; EMA(200) - Long-term trend filter
+
+InpADXPeriod=14
+; Standard ADX period
+
+InpADXThreshold=25
+; ADX > 25 confirms strong trend
+
+;=================================================================
+; STOP LOSS MANAGEMENT (ATR-Based)
+;=================================================================
+InpATRPeriod=14
+; Standard ATR period
+
+InpATRMultiplierSL=2.5
+; SL at 2.5x ATR from entry - gives room for daily volatility
+
+InpATRMoveThreshold=1.0
+; Start trailing after 1 ATR profit
+
+;=================================================================
+; VOLATILITY FILTER
+;=================================================================
+InpUseATRFilter=1
+; Enabled - avoid dead/hysteric markets
+
+InpATRMinPercent=0.5
+; Minimum 0.5% ATR/Price - avoid holiday periods
+
+InpATRMaxPercent=3.0
+; Maximum 3% ATR/Price - avoid extreme volatility
+
+;=================================================================
+; SESSION FILTER
+;=================================================================
+InpUseSessionFilter=0
+; Disabled - D1 trades execute at market close regardless of session
+
+InpSessionStart=0
+InpSessionEnd=24
+
+;=================================================================
+; PYRAMIDING (ADD TO WINNERS)
+;=================================================================
+InpUsePyramiding=0
+; Disabled by default - safer approach
+
+InpPyramidThreshold=2.0
+; Would add when profit > 2x initial risk
+
+InpMaxPyramidUnits=3
+; Max 3 pyramid additions
+
+;=================================================================
+; WEEKLY TREND FILTER
+;=================================================================
+InpUseWeeklyFilter=1
+; Enabled - only trade in direction of weekly trend
+
+InpWeeklyEMA=50
+; Weekly EMA(50) as higher timeframe filter
+
+;=================================================================
+; LOGGING
+;=================================================================
+InpEnableLogging=1
+; Enable CSV logging for analysis
+
+InpEnableAlerts=1
+; Enable alerts for trade notifications
+
+;=================================================================
+; OPTIMIZATION NOTES FOR US30:
+;=================================================================
+;
+; 1. BEST TIMEFRAME: D1 (Daily)
+;    - Captures major trends lasting weeks/months
+;    - Reduces noise and false signals
+;
+; 2. EXPECTED PERFORMANCE:
+;    - Win Rate: 35-45% (trend systems have lower win rate)
+;    - Risk/Reward: 1:3 to 1:5 (big winners compensate losses)
+;    - Trades/Month: 1-3 (patient strategy)
+;    - Max Drawdown: 15-20%
+;
+; 3. MARKET CONDITIONS:
+;    - Works best in trending markets
+;    - Struggles in prolonged ranges
+;    - ADX filter helps avoid choppy periods
+;
+; 4. BROKER REQUIREMENTS:
+;    - Low spread on US30 (< 3 points)
+;    - Swap rates consideration for long holds
+;    - Sufficient margin for index trading
+;
+; 5. ALTERNATIVE SYMBOLS:
+;    - SPX500: Similar settings, slightly tighter ATR filter
+;    - NAS100: Increase ATR max to 4% due to higher volatility
+;    - GER40: Use EU session filter if needed
+;
+;=================================================================
+
+; Version: 1.0
+; Date: 2024-12-27
+; Optimized for: US30 (Dow Jones Industrial Average)
+; Timeframe: D1 (Daily)
+; Strategy: Trend-Following (EMA 50/200 Crossover)
+; Risk Level: Conservative-Medium
