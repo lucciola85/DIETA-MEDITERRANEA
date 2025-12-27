@@ -1,0 +1,128 @@
+; NASDAQ_US500_Hybrid - ULTRA PERMISSIVE Settings for US500
+; Version: 3.0 (ULTRA PERMISSIVE - For Optimization Starting Point)
+; Date: 2024-12-27
+; 
+; THIS SET FILE IS DESIGNED TO GENERATE MAXIMUM TRADES
+; Use as starting point for optimization
+;
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=NASDAQ_US500_Hybrid
+InpMagicNumber=505050
+InpTradeComment=US500_Hybrid
+InpTimeframe=16385
+InpTradeDirection=0
+
+;=================================================================
+; MONEY MANAGEMENT (Very Permissive)
+;=================================================================
+InpLotMode=0
+InpFixedLot=0.1
+InpRiskPercent=2.0
+InpCompoundFactor=1.0
+InpMinLotSize=0.01
+InpMaxLotSize=10.0
+InpMaxPositions=5
+
+;=================================================================
+; PROTECTION SYSTEM (Very Relaxed)
+;=================================================================
+InpMaxDailyLoss=10.0
+InpMaxDrawdown=25.0
+InpMaxDailyProfit=50.0
+InpMaxDailyTrades=50
+InpMaxConsLosses=10
+InpMinMarginLevel=100.0
+InpCloseOnFriday=0
+InpFridayCloseHour=23
+
+;=================================================================
+; SESSION TIMING (COMPLETELY DISABLED)
+;=================================================================
+InpUseSessionFilter=0
+InpSessionStart=0
+InpSessionEnd=23
+InpAvoidLunchHour=0
+InpTradeOpeningHour=0
+
+;=================================================================
+; TREND STRATEGY (Simplified - Just EMA Crossover)
+;=================================================================
+InpUseTrendStrategy=1
+InpEMAFast=5
+InpEMASlow=10
+InpEMAFilter=200
+InpADXPeriod=14
+InpADXTrendLevel=10
+InpMACDFast=12
+InpMACDSlow=26
+InpMACDSignal=9
+
+;=================================================================
+; BREAKOUT STRATEGY (Very Sensitive)
+;=================================================================
+InpUseBreakoutStrategy=1
+InpDonchianPeriod=5
+InpATRPeriod=14
+InpATRBreakoutMult=0.0
+InpConfirmVolume=0
+InpVolumeMult=1.0
+
+;=================================================================
+; STOP LOSS & TAKE PROFIT
+;=================================================================
+InpUseDynamicSLTP=0
+InpFixedSL=500
+InpFixedTP=500
+InpSLATRMultiplier=2.0
+InpTPATRMultiplier=2.0
+InpMinSLPoints=50
+InpMaxSLPoints=1000
+
+;=================================================================
+; POSITION MANAGEMENT (All Disabled for Simplicity)
+;=================================================================
+InpUsePartialClose=0
+InpPartialClosePercent=50.0
+InpPartialCloseRatio=0.5
+InpUseBreakeven=0
+InpBreakevenStart=100
+InpBreakevenOffset=10
+InpUseTrailingStop=0
+InpTrailingStart=100
+InpTrailingStep=50
+InpTrailingDistance=50
+
+;=================================================================
+; DISPLAY SETTINGS
+;=================================================================
+InpShowDashboard=1
+InpDashboardColor=2302755
+InpTextColor=16777215
+InpProfitColor=65280
+InpLossColor=255
+
+;=================================================================
+; ULTRA PERMISSIVE CHANGES:
+;=================================================================
+;
+; 1. EMA PERIODS: 5/10 (molto vicine = più crossover)
+; 2. DONCHIAN PERIOD: 5 (molto corto = più breakout)
+; 3. ATR BREAKOUT MULT: 0.0 (nessun filtro ATR)
+; 4. ADX THRESHOLD: 10 (praticamente sempre attivo)
+; 5. SESSION FILTER: OFF (trading 24/5)
+; 6. VOLUME CONFIRM: OFF (nessun filtro volume)
+; 7. MAX DAILY TRADES: 50 (nessun limite pratico)
+; 8. MAX POSITIONS: 5 (più posizioni simultanee)
+; 9. PARTIAL/BREAKEVEN/TRAILING: OFF (semplicità)
+; 10. FIXED SL/TP: 500 punti (ampio per evitare uscite premature)
+;
+; Con queste impostazioni l'EA DEVE generare trade.
+; Se ancora non funziona, il problema è:
+; - Nome simbolo errato
+; - Timeframe non H1
+; - EA non abilitato
+; - Errori di compilazione
+;
+;=================================================================
