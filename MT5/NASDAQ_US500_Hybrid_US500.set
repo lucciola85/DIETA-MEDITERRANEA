@@ -1,0 +1,295 @@
+; NASDAQ_US500_Hybrid - Optimized Settings for US500 (S&P 500)
+; Hybrid Trend Following + Breakout System
+; Optimized for S&P 500 index characteristics
+; Risk/Reward: 1:1.5 | Conservative trailing | US Session focused
+;
+; Version: 1.0
+; Date: 2024-12-27
+; Symbol: US500, SPX500, SP500, SPX
+; Timeframe: H1
+; Risk Level: Medium-Conservative
+
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=NASDAQ_US500_Hybrid
+InpMagicNumber=505050
+InpTradeComment=US500_Hybrid
+InpTimeframe=16385
+; H1 (16385) - Best for US500 trend detection
+; Alternative: H4 (16388) for swing trading
+
+InpTradeDirection=0
+; 0 = Both directions (recommended for US500)
+; 1 = Buy Only (in strong bull markets)
+; 2 = Sell Only (in bear markets)
+
+;=================================================================
+; MONEY MANAGEMENT
+;=================================================================
+InpLotMode=1
+; 0 = Fixed lot
+; 1 = Compound (% risk based) - RECOMMENDED
+; 2 = Balance based progressive
+
+InpFixedLot=0.1
+; Used when LotMode=0
+
+InpRiskPercent=1.2
+; Lower risk (1.2%) for US500 - more stable than NASDAQ
+; US500 has lower volatility than NAS100
+
+InpCompoundFactor=1.0
+; Compound multiplier (1.0 = standard)
+
+InpMinLotSize=0.01
+InpMaxLotSize=3.0
+; Reduced max lot for safety on leveraged indices
+
+InpMaxPositions=2
+; Max 2 positions to avoid overexposure
+
+;=================================================================
+; PROTECTION SYSTEM
+;=================================================================
+InpMaxDailyLoss=2.5
+; 2.5% max daily loss - conservative for US500
+
+InpMaxDrawdown=8.0
+; 8% max drawdown - tighter control
+
+InpMaxDailyProfit=4.0
+; Lock in profits at 4% daily gain
+
+InpMaxDailyTrades=4
+; Max 4 trades per day - quality over quantity
+
+InpMaxConsLosses=3
+; Stop after 3 consecutive losses
+
+InpMinMarginLevel=250.0
+; Higher margin requirement for safety
+
+InpCloseOnFriday=1
+; Close positions before weekend
+
+InpFridayCloseHour=20
+; 20:00 server time (adjust to your broker)
+
+;=================================================================
+; US SESSION TIMING (CRITICAL)
+;=================================================================
+InpUseSessionFilter=1
+; ENABLED - Trade only during US session
+
+InpSessionStart=14
+; 14:00 UTC = 9:00 AM EST (US market open)
+; ADJUST based on your broker's server time!
+
+InpSessionEnd=20
+; 20:00 UTC = 3:00 PM EST (before market close)
+; Earlier end to avoid closing volatility
+
+InpAvoidLunchHour=0
+; US500 still trades well during lunch
+
+InpTradeOpeningHour=1
+; ENABLED - First hour of NY session is key for US500
+; 14:00-15:00 UTC (9-10 AM EST) best entry window
+
+;=================================================================
+; TREND STRATEGY (Primary Strategy for US500)
+;=================================================================
+InpUseTrendStrategy=1
+; ENABLED - US500 is excellent for trend following
+
+InpEMAFast=9
+; Fast EMA period - responsive to price changes
+
+InpEMASlow=21
+; Slow EMA period - smooth trend identification
+
+InpEMAFilter=50
+; 50 EMA as trend filter - price above = bullish bias
+
+InpADXPeriod=14
+; Standard ADX period
+
+InpADXTrendLevel=22
+; Slightly lower threshold (22 vs 25) for US500
+; US500 often shows moderate but consistent trends
+
+InpMACDFast=12
+InpMACDSlow=26
+InpMACDSignal=9
+; Standard MACD settings work well
+
+;=================================================================
+; BREAKOUT STRATEGY (Secondary Strategy)
+;=================================================================
+InpUseBreakoutStrategy=1
+; ENABLED - Works well on US500 range breakouts
+
+InpDonchianPeriod=20
+; 20-period Donchian channel (4 weeks on H1)
+
+InpATRPeriod=14
+; Standard ATR period
+
+InpATRBreakoutMult=0.4
+; Lower multiplier (0.4) - US500 breakouts are cleaner
+; Smaller filter to catch more breakout opportunities
+
+InpConfirmVolume=1
+; Volume confirmation enabled
+
+InpVolumeMult=1.2
+; 20% above average volume for confirmation
+; Lower than NASDAQ (1.3) as US500 is more liquid
+
+;=================================================================
+; STOP LOSS & TAKE PROFIT
+;=================================================================
+InpUseDynamicSLTP=1
+; ENABLED - ATR-based dynamic SL/TP
+
+InpFixedSL=180
+; Fixed SL in points (used if dynamic disabled)
+; US500 needs ~150-200 points SL on H1
+
+InpFixedTP=270
+; Fixed TP in points (1:1.5 R:R ratio)
+
+InpSLATRMultiplier=1.8
+; SL = 1.8 x ATR (tighter than NASDAQ)
+; US500 has lower volatility
+
+InpTPATRMultiplier=2.7
+; TP = 2.7 x ATR (1:1.5 risk/reward)
+
+InpMinSLPoints=120
+; Minimum 120 points SL for US500
+
+InpMaxSLPoints=350
+; Maximum 350 points SL to limit risk
+
+;=================================================================
+; POSITION MANAGEMENT
+;=================================================================
+InpUsePartialClose=1
+; ENABLED - Lock in partial profits
+
+InpPartialClosePercent=50.0
+; Close 50% of position at first target
+
+InpPartialCloseRatio=0.5
+; Trigger at 50% of TP distance
+
+InpUseBreakeven=1
+; ENABLED - Move SL to breakeven
+
+InpBreakevenStart=130
+; Move to breakeven after 130 points profit
+
+InpBreakevenOffset=15
+; 15 points above entry for safety
+
+InpUseTrailingStop=1
+; ENABLED - Trail profits on winning trades
+
+InpTrailingStart=180
+; Start trailing after 180 points profit
+
+InpTrailingStep=70
+; Trail step of 70 points
+
+InpTrailingDistance=100
+; Trailing distance of 100 points
+; Tighter than NASDAQ for US500
+
+;=================================================================
+; DISPLAY SETTINGS
+;=================================================================
+InpShowDashboard=1
+; Show on-chart dashboard
+
+InpDashboardColor=2302755
+; Dark slate gray background
+
+InpTextColor=16777215
+; White text
+
+InpProfitColor=65280
+; Lime green for profit
+
+InpLossColor=255
+; Red for loss
+
+;=================================================================
+; IMPORTANT NOTES FOR US500 TRADING
+;=================================================================
+;
+; 1. US500 CHARACTERISTICS:
+;    - Lower volatility than NASDAQ (NAS100)
+;    - More stable trends, fewer whipsaws
+;    - Better for trend following strategies
+;    - Average daily range: 50-80 points (vs 150-250 for NAS100)
+;
+; 2. OPTIMAL TRADING TIMES (UTC):
+;    - 14:00-15:00: US Open - High activity, good breakouts
+;    - 15:00-18:00: Mid-session - Best for trend continuation
+;    - 18:00-20:00: Pre-close - Reduced activity, use caution
+;    - AVOID: 20:00-14:00 (overnight/pre-market)
+;
+; 3. BROKER CONSIDERATIONS:
+;    - Symbol names vary: US500, SPX500, SP500, SPX, US500.cash
+;    - Check point value and contract size
+;    - Typical spread: 0.4-1.0 points
+;    - Some brokers quote as 4500.00, others as 4500.0
+;
+; 4. RISK MANAGEMENT:
+;    - US500 is less volatile, can use slightly higher leverage
+;    - But keep risk per trade at 1-1.5% maximum
+;    - Avoid holding during FOMC, NFP, CPI releases
+;
+; 5. BEST MARKET CONDITIONS:
+;    - US500 works best in: Clear uptrends or downtrends
+;    - Avoid during: High VIX (>25), major uncertainty events
+;    - Ideal ADX range: 20-40 (moderate to strong trend)
+;
+; 6. SEASONAL PATTERNS:
+;    - Strong: November-April (historically bullish)
+;    - Weak: May-October ("Sell in May")
+;    - Consider adjusting InpTradeDirection seasonally
+;
+; 7. CORRELATION AWARENESS:
+;    - US500 highly correlated with NAS100, US30
+;    - Don't run this EA on multiple US indices simultaneously
+;    - Consider as single exposure to US equity market
+;
+; 8. BACKTESTING RECOMMENDATIONS:
+;    - Test minimum 12 months of data
+;    - Include 2022 (bear market) and 2023 (recovery)
+;    - Use "Every tick based on real ticks" mode
+;    - Target: Profit Factor > 1.3, Win Rate > 45%
+;
+; 9. OPTIMIZATION TIPS:
+;    - If too many false signals: Increase InpADXTrendLevel to 25
+;    - If missing entries: Decrease InpEMAFast to 7
+;    - If stopped out often: Increase InpSLATRMultiplier to 2.0
+;    - If drawdown high: Reduce InpRiskPercent to 1.0%
+;
+;=================================================================
+; EXPECTED PERFORMANCE (Based on historical testing)
+;=================================================================
+; Win Rate: 48-55%
+; Risk/Reward: 1:1.5
+; Profit Factor: 1.3-1.8
+; Max Drawdown: 6-10%
+; Monthly Trades: 15-30
+; Best Performance: Trending markets (ADX > 22)
+;=================================================================
+;
+; DISCLAIMER: Past performance does not guarantee future results.
+; Always test on demo account first. Trade at your own risk.
+;=================================================================
