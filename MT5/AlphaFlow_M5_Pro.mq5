@@ -9,7 +9,6 @@
 #property description "AlphaFlow M5 Pro - Advanced Expert Advisor for 5-Minute Trading"
 #property description "Optimized for High Profit Factor and Recovery Factor"
 #property description "Multi-strategy with adaptive market regime detection"
-#property strict
 
 #include <Trade\Trade.mqh>
 #include <Trade\SymbolInfo.mqh>
