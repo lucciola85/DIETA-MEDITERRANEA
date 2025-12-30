@@ -1,0 +1,236 @@
+; PORTFOLIO_MANAGER - Optimized Settings for Portfolio Risk Control
+; Purpose: Centralized risk management for EA portfolio
+; Controls: TREND_TURTLE, RANGE_PANTHER, MOMENTUM_SCALPER
+; Risk Level: Conservative | Function: Oversight & Protection
+
+;=================================================================
+; GENERAL SETTINGS
+;=================================================================
+InpEAName=PORTFOLIO_MANAGER
+InpMagicNumber=111000
+; Manager magic number - separate from trading EAs
+
+InpEnableManager=1
+; ENABLED - always enable for portfolio protection
+
+;=================================================================
+; CAPITAL ALLOCATION
+;=================================================================
+InpTotalCapital=100000.0
+; Total portfolio capital - adjust to your account size
+
+InpAllocTrendTurtle=40.0
+; 40% to TREND_TURTLE (low frequency, high R/R)
+
+InpAllocRangePanther=30.0
+; 30% to RANGE_PANTHER (medium frequency)
+
+InpAllocMomentumScalper=30.0
+; 30% to MOMENTUM_SCALPER (higher frequency)
+
+;=================================================================
+; PORTFOLIO SYMBOLS
+;=================================================================
+InpSymbolTrend=US30
+; TREND_TURTLE trades US30 (Dow Jones)
+
+InpSymbolRange=EURGBP
+; RANGE_PANTHER trades EURGBP
+
+InpSymbolMomentum=XAUUSD
+; MOMENTUM_SCALPER trades XAUUSD (Gold)
+
+;=================================================================
+; PORTFOLIO RISK MANAGEMENT
+;=================================================================
+InpMaxPortfolioDD=12.0
+; CRITICAL: Circuit breaker triggers at 12% portfolio drawdown
+
+InpWarningDD=8.0
+; Warning level at 8% - alerts before circuit breaker
+
+InpMaxDailyLoss=3.0
+; Max 3% daily loss - protects against bad days
+
+InpMaxTotalPositions=5
+; Max 5 positions across all EAs
+
+;=================================================================
+; CIRCUIT BREAKER
+;=================================================================
+InpEnableCircuitBreaker=1
+; ENABLED - essential for capital preservation
+
+InpCBTriggerDD=12.0
+; Trigger at 12% drawdown
+
+InpCBPauseDays=1
+; Pause trading for 1 day after trigger
+
+InpCBCloseAll=1
+; Close all positions when circuit breaker triggers
+
+;=================================================================
+; CORRELATION MANAGEMENT
+;=================================================================
+InpMonitorCorrelation=1
+; ENABLED - monitor asset correlations
+
+InpCorrelationThreshold=0.7
+; Alert when correlation > 0.7
+
+InpCorrelationPeriod=20
+; 20-day correlation lookback
+
+InpBlockCorrelatedTrades=0
+; Disabled - alerts only, doesn't block trades
+
+;=================================================================
+; REBALANCING
+;=================================================================
+InpRebalanceMode=1
+; 1 = Monthly rebalancing (recommended)
+; 0 = None, 2 = Weekly, 3 = On drift
+
+InpRebalanceDrift=10.0
+; Rebalance if allocation drifts > 10%
+
+InpRebalanceDay=1
+; Rebalance on 1st of each month
+
+;=================================================================
+; DASHBOARD
+;=================================================================
+InpShowDashboard=1
+; ENABLED - visual monitoring essential
+
+InpDashboardColor=clrDarkSlateGray
+InpTextColor=clrWhite
+InpProfitColor=clrLime
+InpLossColor=clrRed
+InpWarningColor=clrOrange
+
+;=================================================================
+; LOGGING & ALERTS
+;=================================================================
+InpEnableLogging=1
+; Enable portfolio logging
+
+InpEnableAlerts=1
+; Enable critical alerts
+
+InpEmailAlerts=0
+; Disabled by default - enable for remote monitoring
+
+;=================================================================
+; PORTFOLIO MANAGEMENT GUIDELINES:
+;=================================================================
+;
+; 1. CAPITAL ALLOCATION RATIONALE:
+;
+;    TREND_TURTLE (40%):
+;    - Low trade frequency but high potential returns
+;    - Largest allocation due to higher R/R trades
+;    - Single position holds for weeks/months
+;
+;    RANGE_PANTHER (30%):
+;    - Medium frequency, consistent returns
+;    - Complements trend strategy (works in ranges)
+;    - Lower volatility target asset (EURGBP)
+;
+;    MOMENTUM_SCALPER (30%):
+;    - Higher frequency, smaller but more consistent wins
+;    - Gold as decorrelated asset
+;    - Tactical trades with defined R/R
+;
+; 2. CORRELATION ANALYSIS:
+;
+;    US30 vs XAUUSD: Variable (often inverse in risk-off)
+;    US30 vs EURGBP: Low correlation
+;    XAUUSD vs EURGBP: Low correlation
+;
+;    Portfolio designed for diversification!
+;
+; 3. CIRCUIT BREAKER LEVELS:
+;
+;    8% DD  = WARNING: Review positions, reduce risk
+;    12% DD = TRIGGER: Close all, pause trading
+;    
+;    This protects against:
+;    - Black swan events
+;    - Correlation breakdown
+;    - Multiple simultaneous losses
+;
+; 4. REBALANCING STRATEGY:
+;
+;    Monthly rebalancing ensures:
+;    - Winners don't become oversized positions
+;    - Losers don't deplete capital allocation
+;    - Risk stays within targets
+;
+; 5. POSITION LIMITS:
+;
+;    Max 5 total positions because:
+;    - TT: Max 1 (+ pyramids = 3)
+;    - RP: Max 1
+;    - MS: Max 1
+;    Total worst case: 5 positions
+;
+; 6. MONITORING CHECKLIST:
+;
+;    Daily:
+;    □ Check dashboard for status
+;    □ Review daily P/L
+;    □ Check for alerts
+;
+;    Weekly:
+;    □ Review correlation changes
+;    □ Check individual EA performance
+;    □ Verify circuit breaker not triggered
+;
+;    Monthly:
+;    □ Review rebalancing execution
+;    □ Analyze EA contributions
+;    □ Adjust allocations if needed
+;
+; 7. EMERGENCY PROCEDURES:
+;
+;    If circuit breaker triggers:
+;    1. All positions closed automatically
+;    2. Trading paused for InpCBPauseDays
+;    3. Review what caused the drawdown
+;    4. Consider reducing risk before resuming
+;
+;=================================================================
+; SCALING GUIDELINES:
+;=================================================================
+;
+; For Different Account Sizes:
+;
+; $10,000 Account:
+;   InpTotalCapital=10000
+;   TT: $4,000 | RP: $3,000 | MS: $3,000
+;   Risk per trade: 1% ($100)
+;
+; $50,000 Account:
+;   InpTotalCapital=50000
+;   TT: $20,000 | RP: $15,000 | MS: $15,000
+;   Risk per trade: 1% ($500)
+;
+; $100,000 Account:
+;   InpTotalCapital=100000
+;   TT: $40,000 | RP: $30,000 | MS: $30,000
+;   Risk per trade: 1% ($1,000)
+;
+; $500,000 Account:
+;   InpTotalCapital=500000
+;   Consider reducing InpMaxPortfolioDD to 10%
+;   Consider enabling InpBlockCorrelatedTrades=1
+;
+;=================================================================
+
+; Version: 1.0
+; Date: 2024-12-27
+; Purpose: Portfolio Risk Management
+; Controls: TREND_TURTLE, RANGE_PANTHER, MOMENTUM_SCALPER
+; Risk Level: Conservative (Capital Protection)
