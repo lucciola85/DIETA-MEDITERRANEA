@@ -1,10 +1,45 @@
-# GAMORAFX - MT5 Expert Advisor
+# MT5 Expert Advisors Collection
 
-## Overview
+This directory contains professional MetaTrader 5 Expert Advisors for automated forex trading.
+
+## Available Expert Advisors
+
+### 1. TrendSentinel EA
+**File:** `TrendSentinel_MT5.mq5` | **Documentation:** `TrendSentinel_README.md`
+
+An advanced multi-timeframe trend detection EA that scans markets for high-quality trend starts with triple confirmation. Features include:
+- Multi-symbol scanner (up to 28 symbols)
+- 4-timeframe analysis (M15, H1, H4, D1)
+- Quality scoring system (0-10 points)
+- Stop entry orders for momentum confirmation
+- ATR-based trailing stops
+- Partial position close at breakeven
+- Advanced risk management with correlation filtering
+
+**Recommended for:** Trend traders seeking high-probability entries with systematic filtering.
+
+---
+
+### 2. AlphaFlow M5 Pro EA
+**File:** `AlphaFlow_M5_Pro.mq5`
+
+A professional M5 timeframe trading EA optimized for quick scalping and short-term trend following.
+
+---
+
+### 3. DAX40 Hybrid Pro EA
+**File:** `DAX40_Hybrid_Pro.mq5`
+
+Specialized EA designed for trading the DAX40 index with hybrid strategy approach.
+
+---
+
+### 4. GAMORAFX EA
+**File:** `GAMORAFX.mq5`
 
 GAMORAFX is a professional MetaTrader 5 Expert Advisor designed for automated forex trading. It implements a multi-strategy approach with advanced risk management features to maximize profitability while minimizing risk.
 
-## Features
+## GAMORAFX Features
 
 ### Multi-Strategy Trading System
 - **Moving Average Crossover**: Uses fast and slow EMA/SMA crossovers for trend identification
@@ -22,7 +57,7 @@ GAMORAFX is a professional MetaTrader 5 Expert Advisor designed for automated fo
 - **Multiple Timeframe Support**: Works on any timeframe from M1 to MN1
 - **Magic Number**: Unique identifier to manage only positions opened by this EA
 
-## Installation
+## GAMORAFX Installation
 
 1. Copy `GAMORAFX.mq5` to your MetaTrader 5 `Experts` folder:
    ```
@@ -35,7 +70,7 @@ GAMORAFX is a professional MetaTrader 5 Expert Advisor designed for automated fo
 
 4. Configure the input parameters according to your trading preferences
 
-## Input Parameters
+## GAMORAFX Input Parameters
 
 ### General Settings
 | Parameter | Default | Description |
@@ -93,7 +128,7 @@ GAMORAFX is a professional MetaTrader 5 Expert Advisor designed for automated fo
 | Start Hour | 8 | Trading start hour (server time) |
 | End Hour | 20 | Trading end hour (server time) |
 
-## Trading Logic
+## GAMORAFX Trading Logic
 
 ### Signal Generation
 The EA requires a majority of enabled strategies to agree before opening a trade:
