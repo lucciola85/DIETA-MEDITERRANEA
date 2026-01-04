@@ -4,6 +4,24 @@
 
 **TrendSentinel** is an advanced Expert Advisor for MetaTrader 5 that automatically scans multiple markets to identify high-probability trend starts using multi-timeframe analysis and triple confirmation.
 
+## Quick Setup Guide / Guida Rapida
+
+**Domanda: Che timeframe e grafico utilizzare?**
+
+**Risposta:**
+- **Grafico**: Attacca l'EA su **EURUSD** (o qualsiasi simbolo liquido)
+- **Timeframe del grafico**: **M15 o H1** (solo per monitoraggio visivo)
+- **Importante**: Il grafico è solo per visualizzare lo stato dell'EA
+- L'EA scannerizza **tutti i simboli nel Market Watch** indipendentemente dal grafico
+- L'EA usa internamente M15 (segnali), H1 (conferma), H4 (conferma), D1 (filtro)
+
+**Setup in 3 passi:**
+1. Aggiungi i simboli che vuoi tradare nel **Market Watch** (EURUSD, GBPUSD, USDJPY, etc.)
+2. Apri un grafico **EURUSD M15**
+3. Trascina l'EA **TrendSentinel_MT5** sul grafico e configura i parametri
+
+✅ L'EA ora scannerizzerà tutti i simboli del Market Watch ogni 5 minuti!
+
 ## Philosophy
 
 The EA is designed to catch the beginning of genuine trends with high probability by:
@@ -111,9 +129,16 @@ Each signal is scored based on:
 
 2. Compile the EA in MetaEditor (press F7)
 
-3. Attach to any chart (the chart symbol doesn't matter as EA scans all symbols)
+3. **Attach to any chart** - Important notes:
+   - **Chart Symbol**: Any symbol (EURUSD recommended for stability)
+   - **Chart Timeframe**: Any timeframe (M15 or H1 recommended for visual monitoring)
+   - The EA is **multi-symbol and multi-timeframe** - it scans all symbols in Market Watch independently
+   - The chart you attach to is only for monitoring the EA status - it does NOT affect trading
+   - The EA uses `SignalTF` (M15), `ConfirmTF1` (H1), `ConfirmTF2` (H4), and `FilterTF` (D1) internally
 
 4. Configure parameters in the EA settings
+
+**Recommendation**: Attach to **EURUSD M15** chart for easy monitoring, but the EA will trade all symbols in your Market Watch based on the configured timeframes.
 
 ## Input Parameters
 
@@ -211,17 +236,23 @@ Each signal is scored based on:
    - Ensure symbols have good liquidity
    - Avoid exotic pairs with wide spreads
 
-2. **VPS Recommended**
+2. **Chart Setup (Important)**
+   - **Attach EA to**: EURUSD (or any liquid symbol)
+   - **Chart Timeframe**: M15 or H1 (for visual monitoring only)
+   - **The chart is just for display** - the EA scans all Market Watch symbols
+   - Add symbols to Market Watch that you want the EA to trade
+
+3. **VPS Recommended**
    - Run EA on VPS for 24/7 operation
    - Ensures all scans execute on time
    - Prevents missed opportunities
 
-3. **Monitor Daily Risk**
+4. **Monitor Daily Risk**
    - Check daily risk usage regularly
    - Adjust if hitting limits too often
    - Review trades that trigger stops
 
-4. **Backtesting**
+5. **Backtesting**
    - Backtest on "Every tick" mode
    - Test multiple market conditions
    - Verify on different time periods
