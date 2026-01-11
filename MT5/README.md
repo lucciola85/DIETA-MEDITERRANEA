@@ -28,9 +28,29 @@ A professional M5 timeframe trading EA optimized for quick scalping and short-te
 ---
 
 ### 3. DAX40 Hybrid Pro EA
-**File:** `DAX40_Hybrid_Pro.mq5`
+**File:** `DAX40_Hybrid_Pro.mq5` | **Settings:** `DAX40_Hybrid_Pro_GER40_Optimal.set` | **Documentation:** `DAX40_GER40_OPTIMAL_SETTINGS_RESEARCH.md`
 
-Specialized EA designed for trading the DAX40 index with hybrid strategy approach.
+Specialized EA designed for trading the DAX40/GER40 index with hybrid strategy approach combining:
+- **Trend Following:** EMA crossovers (8/21/50) with MACD confirmation
+- **Mean Reversion:** RSI + Stochastic for ranging markets
+- **Breakout Trading:** Donchian breakouts with volume confirmation
+- **Adaptive Regime Detection:** Automatically adjusts to market conditions
+
+**Optimal Settings for GER40:**
+- **Timeframe:** H1 (hourly) - primary recommendation
+- **Trading Session:** European hours (8:00-17:00 server time)
+- **Risk Management:** Conservative 1% per trade with 2:1 R/R
+- **Position Management:** Partial close, breakeven, and trailing stop features
+- **Non-Over-Optimized:** Uses standard technical analysis parameters (not curve-fitted)
+
+**Key Features:**
+- Multi-strategy hybrid approach (trend/range/breakout)
+- ATR-based dynamic stop loss and take profit
+- Session filtering optimized for German market hours
+- Advanced protection system (daily loss limits, drawdown controls)
+- Comprehensive money management options
+
+**Recommended for:** Traders seeking a robust, adaptive system for GER40 with professional risk management and proven non-optimized parameters.
 
 ---
 
