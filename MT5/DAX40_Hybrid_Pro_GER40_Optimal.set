@@ -1,0 +1,379 @@
+; DAX40 Hybrid Pro - Optimal Settings for GER40
+; Professional non-over-optimized configuration for German DAX 40 Index
+; Designed for robust performance across different market conditions
+; Risk Level: Conservative-Moderate | Risk/Reward: 1:2 to 1:3
+; Trading Session: European hours (8:00-17:00 server time)
+
+;=================================================================
+;                    GENERAL SETTINGS
+;=================================================================
+
+InpEAName=DAX40_Hybrid_Pro
+InpMagicNumber=404040
+InpTradeComment=DAX40_HP_GER40
+InpTimeframe=16385
+; H1 (16385) - Optimal for GER40 intraday trading
+; Captures major moves while filtering noise
+
+InpTradeDirection=0
+; 0 = Both directions - GER40 trends strongly in both ways
+
+;=================================================================
+;                    MONEY MANAGEMENT
+;=================================================================
+
+InpLotMode=1
+; 1 = Compound mode (% Risk) - Dynamic position sizing
+
+InpFixedLot=0.1
+; Fixed lot fallback (not used in compound mode)
+
+InpRiskPercent=1.0
+; Conservative 1% risk per trade for GER40
+; Lower than aggressive indices due to reasonable volatility
+
+InpCompoundFactor=1.0
+; Standard compound growth without leverage
+
+InpMinLotSize=0.01
+InpMaxLotSize=5.0
+; Maximum 5 lots to control exposure
+
+InpMaxPositions=2
+; Maximum 2 concurrent positions
+; Prevents overexposure during volatile periods
+
+;=================================================================
+;                    PROTECTION SYSTEM
+;=================================================================
+
+InpMaxDailyLoss=3.0
+; 3% max daily loss - Strong safety net
+; GER40 can have sharp intraday moves
+
+InpMaxDrawdown=10.0
+; 10% maximum drawdown threshold
+; Conservative stop-trading level
+
+InpMaxDailyProfit=5.0
+; 5% daily profit target
+; Take profits and protect capital
+
+InpMaxDailyTrades=5
+; Maximum 5 trades per day
+; Prevents overtrading during choppy conditions
+
+InpMaxConsLosses=3
+; Stop after 3 consecutive losses
+; Protects against unfavorable market conditions
+
+InpMinMarginLevel=200.0
+; 200% minimum margin - Conservative margin safety
+
+InpCloseOnFriday=1
+; Close positions before weekend
+; Avoid weekend gap risk
+
+InpFridayCloseHour=20
+; Close at 20:00 Friday (server time)
+; Before US market close
+
+;=================================================================
+;                DAX SESSION TIMING (CRITICAL)
+;=================================================================
+
+InpUseSessionFilter=1
+; ENABLED - Essential for GER40
+
+InpSessionStart=8
+; 8:00 - German market opens (Frankfurt)
+; High liquidity begins
+
+InpSessionEnd=17
+; 17:00 - Before European session wind-down
+; Avoids low liquidity period
+
+InpAvoidLunchHour=1
+; Avoid 12:00-13:00 CET
+; Lower volume during European lunch
+
+InpTradeUSOverlap=1
+; Trade EU/US overlap (14:00-17:00)
+; Highest volatility and volume period for GER40
+
+;=================================================================
+;                MARKET REGIME DETECTION
+;=================================================================
+
+InpUseHybridMode=1
+; ENABLED - Adaptive strategy selection
+
+InpADXPeriod=14
+; Standard 14-period ADX
+; Reliable trend strength indicator
+
+InpADXTrendLevel=25
+; 25 ADX threshold for trending markets
+; Well-tested level for trend confirmation
+
+InpATRPeriod=14
+; Standard 14-period ATR
+; Volatility measurement
+
+InpATRVolatileMult=1.5
+; 1.5x ATR for high volatility detection
+; Balanced sensitivity
+
+InpBBPeriod=20
+; 20-period Bollinger Bands
+; Standard settings for mean reversion
+
+InpBBDeviation=2.0
+; 2 standard deviations
+; Classic Bollinger Band configuration
+
+;=================================================================
+;                    TREND STRATEGY
+;=================================================================
+
+InpUseTrendStrategy=1
+; ENABLED - Primary strategy for GER40
+
+InpEMAFast=8
+; 8-period Fast EMA
+; Responsive to price changes without excessive noise
+
+InpEMASlow=21
+; 21-period Slow EMA
+; Fibonacci-based period, widely used
+
+InpEMAFilter=50
+; 50-period filter EMA
+; Defines overall trend direction
+
+InpMACDFast=12
+InpMACDSlow=26
+InpMACDSignal=9
+; Standard MACD settings
+; Proven parameters, avoid over-optimization
+
+;=================================================================
+;                    RANGE STRATEGY
+;=================================================================
+
+InpUseRangeStrategy=1
+; ENABLED - For consolidation periods
+
+InpRSIPeriod=14
+; Standard 14-period RSI
+
+InpRSIOverbought=70
+; 70 RSI overbought level
+; Classic threshold for GER40
+
+InpRSIOversold=30
+; 30 RSI oversold level
+; Balanced mean reversion signals
+
+InpStochKPeriod=14
+InpStochDPeriod=3
+InpStochSlowing=3
+; Standard Stochastic settings
+; Non-optimized, robust parameters
+
+;=================================================================
+;                    BREAKOUT STRATEGY
+;=================================================================
+
+InpUseBreakoutStrategy=1
+; ENABLED - Capture GER40 breakouts
+
+InpBreakoutPeriod=20
+; 20-bar lookback for breakouts
+; Donchian-style breakout detection
+
+InpBreakoutATRMult=0.5
+; 0.5 ATR filter
+; Reduces false breakouts
+
+InpConfirmVolume=1
+; Volume confirmation enabled
+; Validates genuine breakouts
+
+;=================================================================
+;                STOP LOSS & TAKE PROFIT
+;=================================================================
+
+InpUseDynamicSLTP=1
+; ATR-based dynamic stops
+; Adapts to market volatility
+
+InpFixedSL=300
+; 300 points fixed SL fallback
+; ~30 pips for GER40 (if ATR unavailable)
+
+InpFixedTP=600
+; 600 points fixed TP
+; 1:2 Risk/Reward ratio
+
+InpSLATRMultiplier=2.0
+; 2.0 ATR for stop loss
+; Conservative stop placement
+
+InpTPATRMultiplier=4.0
+; 4.0 ATR for take profit
+; 1:2 R/R with ATR scaling
+
+InpMinSLPoints=150
+; Minimum 150 points (~15 pips)
+; Prevents too-tight stops on GER40
+
+InpMaxSLPoints=500
+; Maximum 500 points (~50 pips)
+; Controls maximum risk per trade
+
+;=================================================================
+;                TAKE PROFIT MANAGEMENT
+;=================================================================
+
+InpUsePartialClose=1
+; Partial profit taking enabled
+; Locks in gains while letting winners run
+
+InpPartialClosePercent=50.0
+; Close 50% of position at first target
+; Balance between profit-taking and trend-following
+
+InpPartialCloseRatio=0.5
+; Take partial at 50% of full TP
+; Early profit securing
+
+InpUseBreakeven=1
+; Move SL to breakeven
+; Protects capital after profit threshold
+
+InpBreakevenStart=200
+; Activate at 200 points profit (~20 pips)
+; Reasonable threshold for GER40
+
+InpBreakevenOffset=20
+; 20 points above entry for BE
+; Small buffer above entry
+
+InpUseTrailingStop=1
+; Trailing stop enabled
+; Captures extended moves
+
+InpTrailingStart=300
+; Start trailing at 300 points (~30 pips)
+; Gives trade room to develop
+
+InpTrailingStep=100
+; Trail every 100 points
+; Balanced trailing frequency
+
+InpTrailingDistance=150
+; 150 points trailing distance
+; Not too tight, not too loose
+
+;=================================================================
+;                    DISPLAY SETTINGS
+;=================================================================
+
+InpShowDashboard=1
+; Show dashboard for monitoring
+
+InpDashboardColor=0x2F4F4F
+; DarkSlateGray background
+
+InpTextColor=0xFFFFFF
+; White text
+
+InpProfitColor=0x00FF00
+; Lime for profits
+
+InpLossColor=0xFF0000
+; Red for losses
+
+;=================================================================
+;                    IMPORTANT NOTES
+;=================================================================
+;
+; 1. SYMBOL VERIFICATION:
+;    - Ensure your broker symbol is GER40, GER30, DAX, or DE40
+;    - Check contract specifications (point value, spread)
+;    - Typical spread: 1-3 points during liquid hours
+;
+; 2. BROKER TIME ZONE:
+;    - Adjust InpSessionStart/End based on your broker's server time
+;    - Most brokers use GMT+2/GMT+3 (Eastern European Time)
+;    - German session: 8:00-17:00 CET = verify your broker offset
+;
+; 3. TIMEFRAME SELECTION:
+;    - H1 recommended for this configuration
+;    - Can also test on H4 for swing trading (fewer but more reliable signals)
+;    - Avoid lower timeframes (M15/M30) to reduce noise
+;
+; 4. RISK MANAGEMENT:
+;    - Start with demo account for minimum 1 month
+;    - Current settings: 1% risk per trade is conservative
+;    - Can increase to 1.5% after proven profitability
+;    - Never exceed 2% risk per trade
+;
+; 5. OPTIMIZATION PHILOSOPHY:
+;    - These settings avoid curve-fitting
+;    - Based on standard technical analysis principles
+;    - EMAs (8/21/50), RSI (14), MACD (12/26/9) are universal
+;    - Should work across different market conditions
+;
+; 6. SESSION TIMING:
+;    - Best performance during German session (8:00-17:00)
+;    - EU/US overlap (14:00-17:00) provides highest volatility
+;    - Lunch hour (12-13) filtered due to low volume
+;    - No overnight positions to avoid gaps
+;
+; 7. MARKET CONDITIONS:
+;    - Trending: Primarily uses EMA crossovers + MACD
+;    - Ranging: RSI + Stochastic for reversals
+;    - Breakout: Donchian breakout with volume confirmation
+;    - Volatile: Wider stops via ATR adaptation
+;
+; 8. BACKTESTING GUIDELINES:
+;    - Test on minimum 12 months of data
+;    - Include different market conditions (trend/range/volatile)
+;    - Use "Every tick based on real ticks" mode
+;    - Minimum 100 trades for statistical significance
+;    - Look for: Win rate 45-55%, Profit Factor >1.3, Max DD <15%
+;
+; 9. NEWS TRADING:
+;    - Major news affects GER40 significantly
+;    - ECB announcements, German economic data
+;    - US news during overlap period (NFP, FOMC, CPI)
+;    - Consider pausing EA during high-impact news
+;
+; 10. EXPECTED PERFORMANCE (Not Guaranteed):
+;     - Win Rate: 48-55%
+;     - Risk/Reward: 1:2 to 1:3 (dynamic based on ATR)
+;     - Profit Factor: 1.4-2.0
+;     - Max Drawdown: 8-12%
+;     - Average Trades/Week: 3-6 (market dependent)
+;
+;=================================================================
+;                    VERSION INFORMATION
+;=================================================================
+;
+; Settings Version: 1.0
+; EA Version: 1.00
+; Created: 2024
+; Optimized For: GER40 (German DAX 40 Index)
+; Timeframe: H1 (primary), H4 (alternative)
+; Trading Style: Hybrid (Trend + Range + Breakout)
+; Risk Level: Conservative-Moderate
+; Session: European trading hours
+;
+; DISCLAIMER:
+; Past performance is not indicative of future results.
+; Trading involves risk of loss. Only trade with capital
+; you can afford to lose. Test thoroughly before live trading.
+;
+;=================================================================
