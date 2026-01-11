@@ -300,7 +300,8 @@ InpLossColor=0xFF0000
 ;=================================================================
 ;
 ; 1. SYMBOL VERIFICATION:
-;    - Ensure your broker symbol is GER40, GER30, DAX, or DE40
+;    - Ensure your broker symbol is GER40, DAX40, DAX, or DE40
+;    - Note: GER30 refers to old DAX 30 index (now upgraded to DAX 40)
 ;    - Check contract specifications (point value, spread)
 ;    - Typical spread: 1-3 points during liquid hours
 ;

@@ -422,17 +422,28 @@ Our approach deliberately **avoids curve-fitting** by:
 **Account:** €10,000  
 **Risk per Trade:** 1% = €100  
 **Stop Loss:** 200 points  
-**Point Value:** €1 (depends on broker)  
+**Point Value:** Varies by broker (see note below)  
 **Lot Size Calculation:**
 
 ```
 Risk Amount = €100
 Stop Loss Points = 200
-Point Value = €1 per point per lot
+Point Value = MUST VERIFY WITH YOUR BROKER
 
 Lot Size = Risk Amount / (Stop Loss Points × Point Value)
+
+Example with €1 per point:
 Lot Size = €100 / (200 × €1) = 0.5 lots
+
+Example with €25 per point:
+Lot Size = €100 / (200 × €25) = 0.02 lots
 ```
+
+**CRITICAL NOTE:** GER40 point values vary significantly between brokers:
+- CFD Brokers: Often €1 per point per lot
+- Futures Brokers: Usually €25 per point (FDAX contract)
+- Some Brokers: May use €5 or €10 per point
+- **Always verify your broker's contract specifications before trading!**
 
 ### Drawdown Protection
 
